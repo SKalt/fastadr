@@ -1,0 +1,4 @@
+f2b5dd195735013486dd03db8ba095c85b9948bfa487a1afa6cc8bfb7ffe277c  ./0_READ ME OpenADR 3.0 Information and Certification.pdf
+fa5de06f95e146845bde8b2796de12e4eb83058508c452d57abc65f7d621562c  ./1_oadr3.0.0.yaml
+66989b0f173e523f5410d9f6e5b292ec06578afce424081edb689448b1928fb8  ./2_OpenADR 3.0 Definition v3.0.0.pdf
+fed996ec13daa287659c800b6a5c9bdcf9749a4b9baf999b700789937fc89b69  ./3_OpenADR 3.0 User Guide v3.0.0.pdf
