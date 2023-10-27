@@ -9,5 +9,6 @@
     }
   },
   "bashIde.shellcheckArguments": "--source-path=SCRIPTDIR  --external-sources",
-  "python.terminal.activateEnvironment": false
+  "python.terminal.activateEnvironment": false,
+  "cSpell.words": ["vens"]
 }

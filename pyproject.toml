@@ -7,10 +7,13 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+fastapi = "^0.104.0"
+pydantic = "^2.4.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 mypy = "*"
 ruff = "*"
+pre-commit = "^3.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
