@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Annotated, Literal, Optional, TypeVar, Union
 
 import annotated_types
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, Strict
 from pydantic_core import Url
 
 
@@ -25,19 +25,19 @@ class OAuthScopes(Enum):
     write_vens = "write_vens"
     """VENS and BL can write to vens and resources"""
 
-Duration = Annotated[str, timedelta] # FIXME: validate ISO 8601 format
+Duration = Annotated[timedelta, str, Strict()] # FIXME: validate ISO 8601 format
 """duration in ISO 8601 format"""
 
-DateTime = Annotated[str, datetime]
+DateTime = Annotated[datetime, str, Strict()]
 """datetime in ISO 8601 format"""
 
 HTTPStatusCode = Annotated[int, annotated_types.Ge(100), annotated_types.Lt(600)]
 
-ObjectID = Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$")]
+ObjectID = Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$", min_length=1, max_length=128)]
 """URL safe VTN assigned object ID."""
 # TODO: shouldn't ObjectID have at least one character?
 
-Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100)]
+Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100), Strict()]
 
 class Problem(BaseModel):
     """reusable error response. From https://opensource.zalando.com/problem/schema.yaml."""
@@ -100,7 +100,7 @@ class Point(BaseModel):
     y: Optional[float] = None
     """A value on a y axis."""
 
-
+# TODO: implement the `type` enumerations from page 15 of 2_OpenADR 3.0 Definition v3.0.0.pdf
 class ValuesMap(BaseModel):
     """
     Represents one or more values associated with a type.
@@ -172,7 +172,11 @@ class IntervalPeriod(BaseModel):
     A randomizeStart of default null indicates no randomization.
     """
     start: DateTime
+    """The start time of an interval or set of intervals."""
+    duration: Optional[Duration] = None
+    """The duration of an interval or set of intervals."""
     randomizeStart: Optional[Duration] = None
+    """a randomization time that may be applied to start."""
 
 
 class Interval(BaseModel):
@@ -314,12 +318,13 @@ class Event(BaseModel):
 
 
 class ProgramDescription(BaseModel):
-    url: Url
+    URL: Url
     """A human or machine readable program description"""
 
 PayloadType = TypeVar("PayloadType", str, Enum)
 
 # TODO: make generic over payloadType, objectType
+
 class EventPayloadDescriptor(BaseModel):
     """
     Contextual information used to interpret event valuesMap values.
@@ -355,6 +360,7 @@ class ReportPayloadDescriptor(BaseModel):
     """A quantification of the accuracy of a set of payload values."""
     confidence: Percent = 100
     """A quantification of the confidence in a set of payload values."""
+
 
 class Program(BaseModel):
     """
@@ -399,16 +405,17 @@ class Program(BaseModel):
 
 class VEN(BaseModel):
     """VEN represents a client with the ven role."""
-    id: Optional[ObjectID]
-    creationDateTime: Optional[DateTime]
-    modificationDateTime: Optional[DateTime]
-    objectType: Literal["VEN"] = ObjectTypes.VEN.value
+    id: Optional[ObjectID] = None
+    #^ if the `id`` key is present, then the value must be present
+    creationDateTime: Optional[DateTime] = None
+    modificationDateTime: Optional[DateTime] = None
+    objectType: Literal["VEN"]
     venName: Optional[str] = None
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.
     """
-    attributes: list[ValuesMap]
+    attributes: list[ValuesMap] = Field(default_factory=lambda: [])
     """ A list of valuesMap objects describing attributes."""
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[ValuesMap]] = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing target criteria."""
     resources: Optional[list[Resource]] = None

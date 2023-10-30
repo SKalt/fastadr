@@ -2,13 +2,14 @@
   "editor.formatOnSave": true,
   "python.analysis.typeCheckingMode": "strict",
   "[python]": {
-    "editor.defaultFormatter": null,
-    "editor.codeActionsOnSave": {
-      "source.fixAll.ruff": true,
-      "source.organizeImports.ruff": true
-    }
+    "editor.defaultFormatter": "charliermarsh.ruff"
+    // "editor.codeActionsOnSave": {
+    //   "source.fixAll.ruff": true,
+    //   "source.organizeImports.ruff": true
+    // }
   },
   "bashIde.shellcheckArguments": "--source-path=SCRIPTDIR  --external-sources",
   "python.terminal.activateEnvironment": false,
-  "cSpell.words": ["vens"]
+  "cSpell.words": ["vens"],
+  "python.analysis.importFormat": "relative"
 }

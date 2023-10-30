@@ -1,0 +1,4 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/ven
+{
+  venName: "" # only the name is mandatory -- but it can be empty
+}

@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/ven
+{
+  venName: "MandatoryName", # can be null
+  id: "id",
+  creationDateTime: null,
+  modificationDateTime: "2021-06-10", 
+  objectType: "VEN",
+  attributes: [
+    # valueMap objects go here
+  ],
+  targets: [
+    # more valueMaps
+  ],
+  resources: [
+    # resource objects
+  ],
+}
