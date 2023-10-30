@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/report
+{
+  "id": "id-123", # VTN provisioned ID of this object instance.
+  "createdDateTime": "2021-06-10T00:00:00Z",
+  "modificationDateTime": "2006-01-02T15:04:05Z",
+  "objectType": "REPORT", # omissible
+  "programID": "program-123",
+  "eventID": "event-123",
+  "clientName": "User generated identifier; may be VEN ID provisioned during program enrollment. Unrestricted, nullable",
+  "reportName": "User defined string for use in debugging or User Interface.", # nullable, unrestricted
+  "payloadDescriptors": [
+      {
+        "objectType": "REPORT_PAYLOAD_DESCRIPTOR", # omissible, unrestricted
+        "payloadType": "Enumerated or private string signifying the nature of values.", # required, unrestricted
+        "readingType": "Enumerated or private string signifying the type of reading.", # omissible, unrestricted
+        "units": "KWH", # omissible, unrestricted
+        "accuracy": 0.0, # omissible, unrestricted float
+        "targets": [{ 1, 1.1, "type": "PRICE", "values": [
+                  "string",
+                  true,
+                  false,
+                  { "x": 1.1, "y": 2.2 }, # both required but nullable
+                ] }], # omissible, nullable
+      },
+    ], # nullable
+  "resources": [
+      {
+        "resourceName": "User generated identifier. A value of AGGREGATED_REPORT indicates an aggregation of more that one resource's data", # required, nullable, unrestricted
+        "intervalPeriod": {
+            "start": "2006-01-02T15:04:05Z",
+            "duration": "PT1H",
+            "randomizeStart": "PT1H",
+          }, # omissible, non-nullable
+        "intervals":
+          [
+            {
+              "id": 0,
+              payloads: [{ "type": "", "values": [] }],
+              "intervalPeriod":
+                {
+                  "start": "2021-06-10T15:04:05Z",
+                  "duration": "P1Y2M10DT2H30M",
+                  "randomizeStart": "PT100H",
+                },
+            },
+          ],
+      },
+    ], # omissible
+}

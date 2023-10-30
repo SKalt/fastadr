@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/program
+{
+  "id": "1-128_char_identifier_with_CAPS_dashes-and_underscores_",
+  "programName": "infinite length and unrestricted characters 🎃!!!",
+  "objectType": "PROGRAM", # optional, but must be "PROGRAM" if supplied
+  "createdDateTime": "2021-06-10T00:01:01Z", # optional iso-8601 datetime
+  "modificationDateTime": "2021-06-10T00:01:01Z", # optional iso-8601 datetime
+  "retailerName": "Short name of energy retailer providing the program. No restrictions on characters 🎃 or length 🎃🎃 -- it can even be longer than the long name!",
+  "retailerLongName": "Long name of energy retailer for human readability. Unrestricted 🎃 nullable string.",
+  "country": "Alpha-2 code per ISO 3166-1. Unrestricted 🎃 nullable string!",
+  "principalSubdivision": "Coding per ISO 3166-2. E.g. state in US. Unrestricted 🎃 nullable string!",
+  "programType": "A program defined categorization. Yet another unrestricted 🎃 nullable string!",
+  "timeZoneOffset": "PT7H", # nullable # Question: how to represent negative offsets?
+  "intervalPeriod":
+    {
+      "start": "2006-01-02T15:04:05Z",
+      "duration": "PT1H",
+      "randomizeStart": "PT1H",
+    },
+  "programDescriptions": [ # nullable
+      # might be empty
+      { "URL": "https://example.com/path/to/page" },
+    ],
+  "bindingEvents": true, # Optinal; True if events are fixed once transmitted
+  "localPrice": true, # Optional; True if events have been adapted from a grid event.
+  "payloadDescriptors": [], # nullable
+  # - TODO: supply eventPayloadDescriptor
+  # - TODO: supply reportPayloadDescriptor
+  "targets": [], # nullable
+  # - TODO: supply valuesMap(s)
+}

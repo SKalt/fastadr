@@ -3,7 +3,7 @@
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Annotated, Literal, Optional, TypeVar, Union
+from typing import Annotated, Literal, Optional, Union
 
 import annotated_types
 from pydantic import BaseModel, Field, StringConstraints, Strict
@@ -25,7 +25,8 @@ class OAuthScopes(Enum):
     write_vens = "write_vens"
     """VENS and BL can write to vens and resources"""
 
-Duration = Annotated[timedelta, str, Strict()] # FIXME: validate ISO 8601 format
+
+Duration = Annotated[timedelta, str, Strict()]  # FIXME: validate ISO 8601 format
 """duration in ISO 8601 format"""
 
 DateTime = Annotated[datetime, str, Strict()]
@@ -33,15 +34,19 @@ DateTime = Annotated[datetime, str, Strict()]
 
 HTTPStatusCode = Annotated[int, annotated_types.Ge(100), annotated_types.Lt(600)]
 
-ObjectID = Annotated[str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$", min_length=1, max_length=128)]
+ObjectID = Annotated[
+    str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$", min_length=1, max_length=128)
+]
 """URL safe VTN assigned object ID."""
 # TODO: shouldn't ObjectID have at least one character?
 
 Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100), Strict()]
 
+
 class Problem(BaseModel):
     """reusable error response. From https://opensource.zalando.com/problem/schema.yaml."""
-    type: Url = Url("about:blank") # really a URI
+
+    type: Url = Url("about:blank")  # really a URI
     """
     An absolute URI that identifies the problem type.
     When dereferenced, it SHOULD provide human-readable documentation for the problem type
@@ -72,6 +77,7 @@ class Problem(BaseModel):
 
 class ReportResource(BaseModel):
     """Report data associated with a resource."""
+
     resourceName: Optional[str] = None
     """
     User generated identifier. A value of AGGREGATED_REPORT indicates an aggregation of more that one resource's data
@@ -95,10 +101,12 @@ class Point(BaseModel):
     """
     A pair of floats typically used as a point on a 2 dimensional grid.
     """
+
     x: Optional[float] = None
     """A value on an x axis."""
     y: Optional[float] = None
     """A value on a y axis."""
+
 
 # TODO: implement the `type` enumerations from page 15 of 2_OpenADR 3.0 Definition v3.0.0.pdf
 class ValuesMap(BaseModel):
@@ -106,6 +114,7 @@ class ValuesMap(BaseModel):
     Represents one or more values associated with a type.
     E.g. a type of PRICE contains a single float value.
     """
+
     type: str
     """
     Enumerated or private string signifying the nature of values.
@@ -122,6 +131,7 @@ class ReportDescriptor(BaseModel):
     An object that may be used to request a report from a VEN.
     See OpenADR REST User Guide for detailed description of how configure a report request.
     """
+
     payloadType: str
     """
     Enumerated or private string signifying the nature of values.
@@ -171,7 +181,8 @@ class IntervalPeriod(BaseModel):
     A duration of default null indicates infinity.
     A randomizeStart of default null indicates no randomization.
     """
-    start: DateTime
+
+    start: Optional[DateTime]
     """The start time of an interval or set of intervals."""
     duration: Optional[Duration] = None
     """The duration of an interval or set of intervals."""
@@ -184,6 +195,7 @@ class Interval(BaseModel):
     An object defining a temporal window and a list of valuesMaps.
     if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
     """
+
     id: int
     """
     A client generated number assigned an interval object. Not a sequence number.
@@ -198,12 +210,13 @@ class Resource(BaseModel):
     """
     A resource is an energy device or system subject to control by a VEN.
     """
+
     id: Optional[ObjectID]
     createdDateTime: Optional[DateTime]
     modificationDateTime: Optional[DateTime]
     objectType: Literal["RESOURCE"] = ObjectTypes.RESOURCE.value
     """Used as discriminator, e.g. notification.object"""
-    resourceName: Optional[str| None] = None
+    resourceName: Optional[str | None] = None
     """
     User generated identifier, resource may be configured with identifier out-of-band.
     """
@@ -223,6 +236,7 @@ class Notification(BaseModel):
     """
     VTN generated object included in request to subscription callbackUrl.
     """
+
     objectType: ObjectTypes
     operation: HTTPMethod
     """
@@ -232,7 +246,7 @@ class Notification(BaseModel):
     """
     A list of valuesMap objects.
     """
-    object: Union["Program", "Event", "Report", "Subscription", Resource , "VEN"]
+    object: Union["Program", "Event", "Report", "Subscription", Resource, "VEN"]
     """
     the object that is the subject of the notification.
     """
@@ -250,12 +264,14 @@ class ObjectOperationSub(BaseModel):
     should accept the provided bearer token to authenticate VTN requests.
     """
 
+
 class Subscription(BaseModel):
     """
     An object created by a client to receive notification of operations on objects.
     Clients may subscribe to be notified when a type of object is created,
     updated, or deleted.
     """
+
     id: Optional[ObjectID]
     createdDateTime: Optional[DateTime]
     modificationDateTime: Optional[DateTime]
@@ -270,6 +286,7 @@ class Subscription(BaseModel):
 
 class Report(BaseModel):
     """report object."""
+
     id: Optional[ObjectID]
     createdDateTime: Optional[DateTime]
     modificationDateTime: Optional[DateTime]
@@ -295,6 +312,7 @@ class Event(BaseModel):
     Event object to communicate a Demand Response request to VEN.
     If intervalPeriod is present, sets start time and duration of intervals.
     """
+
     id: Optional[ObjectID] = None
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
@@ -321,9 +339,11 @@ class ProgramDescription(BaseModel):
     URL: Url
     """A human or machine readable program description"""
 
-PayloadType = TypeVar("PayloadType", str, Enum)
+
+# PayloadType = TypeVar("PayloadType", str, Enum)
 
 # TODO: make generic over payloadType, objectType
+
 
 class EventPayloadDescriptor(BaseModel):
     """
@@ -331,6 +351,7 @@ class EventPayloadDescriptor(BaseModel):
     E.g. a PRICE payload simply contains a price value, an
     associated descriptor provides necessary context such as units and currency.
     """
+
     objectType: str = "EVENT_PAYLOAD_DESCRIPTOR"
     """Used as discriminator, e.g. program.payloadDescriptors"""
     payloadType: str
@@ -348,6 +369,7 @@ class ReportPayloadDescriptor(BaseModel):
     E.g. a USAGE payload simply contains a usage value, an
     associated descriptor provides necessary context such as units and data quality.
     """
+
     objectType: str = "REPORT_PAYLOAD_DESCRIPTOR"
     """Used as discriminator, e.g. program.payloadDescriptors"""
     payloadType: str
@@ -366,7 +388,8 @@ class Program(BaseModel):
     """
     Provides program specific metadata from VTN to VEN.
     """
-    id: Optional[ObjectID]
+
+    id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
     programName: str
     """Short name to uniquely identify program."""
     programLongName: Optional[str] = None
@@ -397,7 +420,9 @@ class Program(BaseModel):
     """True if events are fixed once transmitted."""
     localPrice: bool = False
     """True if events have been adapted from a grid event."""
-    payloadDescriptors: Optional[list[ ReportPayloadDescriptor | EventPayloadDescriptor ]] = None
+    payloadDescriptors: Optional[
+        list[ReportPayloadDescriptor | EventPayloadDescriptor]
+    ] = None
     """A list of payloadDescriptors"""
     targets: Optional[list[ValuesMap]] = None
     """A list of valuesMap objects."""
@@ -405,11 +430,12 @@ class Program(BaseModel):
 
 class VEN(BaseModel):
     """VEN represents a client with the ven role."""
+
     id: Optional[ObjectID] = None
-    #^ if the `id`` key is present, then the value must be present
+    # ^ if the `id`` key is present, then the value must be present
     creationDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["VEN"]
+    objectType: Literal["VEN"] = ObjectTypes.VEN.value
     venName: Optional[str] = None
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.

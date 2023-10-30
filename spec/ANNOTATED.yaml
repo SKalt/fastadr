@@ -1629,6 +1629,7 @@ components:
           type: string
           description: Short name to uniquely identify program.
           example: ResTOU
+          # TODO: min>=1, max length, notes on char restrictions?
         programLongName:
           type: string
           description: Long name of program for human readability.
@@ -1656,12 +1657,14 @@ components:
         country:
           type: string
           description: Alpha-2 code per ISO 3166-1.
+          # FIXME: include restriction pattern (2 alphabetic chars).
           example: US
           nullable: true
           default: null
         principalSubdivision:
           type: string
           description: Coding per ISO 3166-2. E.g. state in US.
+          # FIXME: specify constraints: 1 <= lengh <=3, alphanumeric
           example: CO
           nullable: true
           default: null
@@ -1685,7 +1688,7 @@ components:
                 format: uri # Are relative URIs valid?
                 description: A human or machine readable program description
                 example: www.myCorporation.com/myProgramDescription
-                # URIs should include a protocol -- www.etc isn't valid.
+                # FIXME: URIs should include a protocol -- www.etc isn't valid.
                 # see also: https://en.wikipedia.org/wiki/Uniform_Resource_Identifier, https://www.w3.org/TR/uri-clarification/
         bindingEvents:
           type: boolean
@@ -1956,7 +1959,7 @@ components:
           type: string
           description: User generated identifier, may be VEN identifier provisioned during program enrollment.
           example: VEN-999
-          nullable: true # see https://swagger.io/docs/specification/data-models/data-types/#null 
+          nullable: true # see https://swagger.io/docs/specification/data-models/data-types/#null
           default: null
           # TODO: min >=1, max length?
         attributes:
@@ -2302,6 +2305,14 @@ components:
       # FIXME: add `format` property? See https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
       # see also: https://swagger.io/specification/#data-type-format
       # practically, `pydantic` generates {"format": "duration", "type": "string"}
+      # TODO: check whether ISO-8601 time intervals parse to timedeltas.
+      # For example, ISO-8601 (probably) specifies these formats:
+      # > Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
+      # > Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"
+      # > Duration and end, such as "P1Y2M10DT2H30M/2008-05-11T15:30:00Z"
+      # > Duration only, such as "P1Y2M10DT2H30M", with additional context information
+      # >
+      # > -- https://en.wikipedia.org/wiki/ISO_8601
       example: PT1H
       nullable: true
       default: null

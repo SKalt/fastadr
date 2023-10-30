@@ -1,9 +1,10 @@
 import json
 from pathlib import Path
-from yaml import safe_load
+import yaml
 from pydantic import TypeAdapter, ValidationError
 from pydantic_core import Url
 import pytest
+from typing import Any, Protocol
 from src.schemata import (
     Duration,
     DateTime,
@@ -12,8 +13,8 @@ from src.schemata import (
     IntervalPeriod,
     ProgramDescription,
     VEN,
-    # Program
-    # Report
+    Program,
+    Report,
     # Event
     # Subscription
     # Resource
@@ -32,7 +33,54 @@ from src.schemata import (
 )
 from datetime import timedelta
 
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
+_this_dir = Path(__file__).parent
+REPO_ROOT = _this_dir.parent
+FIXTURES_DIR = Path(__file__).parent / "examples"
+
+
+def get_json(file: Path) -> str:
+    """Load a YAML file, then dump it as JSON"""
+    with open(file) as f:
+        return json.dumps(yaml.safe_load(f))
+
+
+class Validator(Protocol):
+    def model_validate_json(self, json_data: str | bytes) -> Any:
+        ...
+
+
+def check_valid(model: Validator, file: Path):
+    try:
+        model.model_validate_json(get_json(file))
+    except ValidationError as e:
+        e.add_note(f"file: {file.relative_to(REPO_ROOT)}")
+        raise e
+
+
+# note: I'm using a custom check instead of pydantic.raises(ValidationError) in order to
+# ensure that the file name is included in the error message
+def check_invalid(model: Validator, file: Path):
+    try:
+        model.model_validate_json(get_json(file))
+        assert False, f"expected {file.relative_to(REPO_ROOT)} to be invalid"
+    except ValidationError:
+        pass  # expected
+
+
+def get_examples(example_dir: Path, *, ok: bool) -> list[Path]:
+    d = example_dir / ("valid" if ok else "invalid")
+    assert d.exists() and d.is_dir()
+    examples = [f for f in d.glob("*.yaml")]
+    assert len(examples) > 0
+    return examples
+
+
+def get_valid_examples(example_dir: Path) -> list[Path]:
+    return get_examples(example_dir, ok=True)
+
+
+def get_invalid_examples(example_dir: Path) -> list[Path]:
+    return get_examples(example_dir, ok=False)
 
 
 def test_duration():
@@ -81,6 +129,7 @@ def test_object_id():
     with pytest.raises(ValidationError):
         # ObjectID shouldn't accept integers
         validator.validate_json("0")
+
 
 def test_percent():
     validator = TypeAdapter(Percent)
@@ -140,15 +189,40 @@ def test_interval_period():
 
 
 def test_ven():
-    ven_examples_dir = FIXTURES_DIR / "VEN"
-    for i in (ven_examples_dir / "valid").glob("*.yaml"):
-        doc = json.dumps(safe_load(i.read_text()))  # strip comments
-        VEN.model_validate_json(doc)
-    # weird-yet valid cases:
+    examples_dir = FIXTURES_DIR / "VEN"
+    assert examples_dir.exists() and examples_dir.is_dir()
+    valid_examples = [f for f in (examples_dir / "valid").glob("*.yaml")]
+    assert len(valid_examples)
+    for f in valid_examples:
+        try:
+            VEN.model_validate_json(get_json(f))
+        except ValidationError as e:
+            e.add_note(f"file: {f.relative_to(REPO_ROOT)}")
+            raise e
+    # weird-yet-valid cases:
     VEN(objectType="VEN")  # all defaults -- many of which are surprisingly null/None
     VEN(venName=None, objectType="VEN")  # - venName is required, but can be null/None
-    VEN(venName="", objectType="VEN")    # - venName is required, but can be empty string
-    for i in (ven_examples_dir / "invalid").glob("*.yaml"):
+    VEN(venName="", objectType="VEN")  # - venName is required, but can be empty string
+    invalid_examples = [f for f in (examples_dir / "invalid").glob("*.yaml")]
+    assert len(invalid_examples) > 0
+    for f in invalid_examples:
         with pytest.raises(ValidationError):
-            doc = json.dumps(safe_load(i.read_text()))  # strip comments
-            VEN.model_validate_json(doc)
+            VEN.model_validate_json(get_json(f))
+
+
+program_examples_dir = FIXTURES_DIR / "program"
+
+
+@pytest.mark.parametrize("f", get_valid_examples(program_examples_dir))
+def test_valid_program(f: Path):
+    check_valid(Program, f)
+
+
+@pytest.mark.parametrize("f", get_invalid_examples(program_examples_dir))
+def test_invalid_program(f: Path):
+    check_invalid(Program, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "report"))
+def test_report(f: Path):
+    check_valid(Report, f)
