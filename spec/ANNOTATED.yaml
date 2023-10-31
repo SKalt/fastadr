@@ -1824,7 +1824,7 @@ components:
           nullable: true
           default: null
         priority:
-          type: integer # FIXME: how to handle -1000?
+          type: integer # FIXME: how to handle negatives?
           description: Relative priority of event. A lower number is a higher priority.
           example: 0
           nullable: true
@@ -2035,6 +2035,7 @@ components:
         intervalPeriod:
           $ref: "#/components/schemas/intervalPeriod"
           # Defines default start and durations of intervals.
+          # FIXME: what's the default value for this omissible field?
         payloads:
           type: array
           description: A list of valuesMap objects.

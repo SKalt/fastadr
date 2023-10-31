@@ -15,7 +15,7 @@ from src.schemata import (
     VEN,
     Program,
     Report,
-    # Event
+    Event,
     # Subscription
     # Resource
     # Interval
@@ -226,3 +226,8 @@ def test_invalid_program(f: Path):
 @pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "report"))
 def test_report(f: Path):
     check_valid(Report, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "event"))
+def test_valid_event(f: Path):
+    check_valid(Event, f)

@@ -200,8 +200,13 @@ class Interval(BaseModel):
     """
     A client generated number assigned an interval object. Not a sequence number.
     """
-    intervalPeriod: Optional[IntervalPeriod]
+
+    intervalPeriod: IntervalPeriod = Field(
+        default_factory=lambda: IntervalPeriod(start=None)
+    )
     """Defines default start and durations of intervals."""
+    # TODO: clarify default value for omissible non-null intervalPeriod
+
     payloads: list[ValuesMap]
     """A list of valuesMap objects."""
 
@@ -287,9 +292,9 @@ class Subscription(BaseModel):
 class Report(BaseModel):
     """report object."""
 
-    id: Optional[ObjectID]
-    createdDateTime: Optional[DateTime]
-    modificationDateTime: Optional[DateTime]
+    id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
+    createdDateTime: Optional[DateTime] = None
+    modificationDateTime: Optional[DateTime] = None
     objectType: Literal["REPORT"] = ObjectTypes.REPORT.value
     programID: ObjectID
     eventID: ObjectID
