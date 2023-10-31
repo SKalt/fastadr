@@ -1,6 +1,8 @@
 # `fastadr`
 
-Goal: replicate the entire OpenAPI 3 spec.
+Goal: implement the entire OpenAPI 3 spec.
+
+Status: work in progress.
 
 Types:
 
@@ -23,3 +25,8 @@ Types:
 - [x] dateTime
 - [x] duration
 - [x] problem
+
+## Copyright License
+
+Note that all documents in [`./spec`](./spec/) are copyrighted by the OpenADR Alliance.
+The other code in this repo (`./src`, `./test`) are covered by [`./LICENSE`](./LICENSE)
