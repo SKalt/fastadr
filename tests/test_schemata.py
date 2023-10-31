@@ -21,7 +21,7 @@ from src.schemata import (
     Interval,
     ValuesMap,
     Point,
-    # EventPayloadDescriptor,
+    EventPayloadDescriptor,
     # ReportPayloadDescriptor,
     # ReportDescriptor,
     # ObjectID,
@@ -261,3 +261,10 @@ def test_valid_valuesMap(f: Path):
 @pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "point"))
 def test_valid_point(f: Path):
     check_valid(Point, f)
+
+
+@pytest.mark.parametrize(
+    "f", get_valid_examples(FIXTURES_DIR / "eventPayloadDescriptor")
+)
+def test_valid_eventPayloadDescriptor(f: Path):
+    check_valid(EventPayloadDescriptor, f)
