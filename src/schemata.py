@@ -42,6 +42,8 @@ ObjectID = Annotated[
 
 Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100), Strict()]
 
+Int32 = Annotated[int, annotated_types.Ge(-2147483648), annotated_types.Le(2147483647)]
+
 
 class Problem(BaseModel):
     """reusable error response. From https://opensource.zalando.com/problem/schema.yaml."""
@@ -147,12 +149,12 @@ class ReportDescriptor(BaseModel):
     True if report should aggregate results from all targeted resources.
     False if report includes results for each resource.
     """
-    startInterval: Optional[int] = -1
+    startInterval: Int32 = -1
     """
     The interval on which to generate a report.
     -1 indicates generate report at end of last interval.
     """
-    numIntervals: int = -1
+    numIntervals: Int32 = -1
     """
     The number of intervals to include in a report.
     -1 indicates that all intervals are to be included.
@@ -162,12 +164,12 @@ class ReportDescriptor(BaseModel):
     True indicates report on intervals preceding startInterval.
     False indicates report on intervals following startInterval (e.g. forecast).
     """
-    frequency: Optional[int] = -1
+    frequency: Int32 = -1
     """
     Number of intervals that elapse between reports.
     -1 indicates same as numIntervals.
     """
-    repeat: int = 1
+    repeat: Int32 = 1
     """
     Number of times to repeat report.
     1 indicates generate one report.
@@ -196,7 +198,7 @@ class Interval(BaseModel):
     if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
     """
 
-    id: int
+    id: Int32
     """
     A client generated number assigned an interval object. Not a sequence number.
     """
