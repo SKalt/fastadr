@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Annotated, Literal, Optional, Union
 
 import annotated_types
-from pydantic import BaseModel, Field, StringConstraints, Strict
+from pydantic import BaseModel, Field, StrictFloat, StringConstraints, Strict
 from pydantic_core import Url
 
 
@@ -410,14 +410,20 @@ class ReportPayloadDescriptor(BaseModel):
 
     objectType: str = "REPORT_PAYLOAD_DESCRIPTOR"
     """Used as discriminator, e.g. program.payloadDescriptors"""
+
     payloadType: str
     """Enumerated or private string signifying the nature of values."""
+
     units: str = "KWH"
     """Units of measure."""
+
     readingType: str = "DIRECT_READ"
     """Enumerated or private string signifying the type of reading."""
-    accuracy: float = 0.0
+
+    accuracy: StrictFloat = 0.0
     """A quantification of the accuracy of a set of payload values."""
+    # FIXME: ^`"format": "float"` missing from generated json schema
+
     confidence: Percent = 100
     """A quantification of the confidence in a set of payload values."""
 

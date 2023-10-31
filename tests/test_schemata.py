@@ -22,7 +22,7 @@ from src.schemata import (
     ValuesMap,
     Point,
     EventPayloadDescriptor,
-    # ReportPayloadDescriptor,
+    ReportPayloadDescriptor,
     # ReportDescriptor,
     # ObjectID,
     # Notification,
@@ -268,3 +268,17 @@ def test_valid_point(f: Path):
 )
 def test_valid_eventPayloadDescriptor(f: Path):
     check_valid(EventPayloadDescriptor, f)
+
+
+@pytest.mark.parametrize(
+    "f", get_valid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
+)
+def test_valid_reportPayloadDescriptor(f: Path):
+    check_valid(ReportPayloadDescriptor, f)
+
+
+@pytest.mark.parametrize(
+    "f", get_invalid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
+)
+def test_invalid_reportPayloadDescriptor(f: Path):
+    check_invalid(ReportPayloadDescriptor, f)

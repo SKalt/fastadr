@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/reportPayloadDescriptor
+{
+  "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
+  "payloadType": "USAGE",
+  "readingType": "DIRECT_READ",
+  "units": "KWH",
+  "accuracy": 1000000000000000.0,
+  "confidence": 100,
+}
