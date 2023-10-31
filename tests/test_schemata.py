@@ -19,17 +19,17 @@ from src.schemata import (
     Subscription,
     Resource,
     Interval,
-    # ValuesMap
-    # Point
-    # EventPayloadDescriptor
-    # ReportPayloadDescriptor
-    # ReportDescriptor
-    # ObjectID
-    # Notification
-    # ObjectTypes
-    # DateTime
-    # Duration
-    # Problem
+    ValuesMap,
+    Point,
+    # EventPayloadDescriptor,
+    # ReportPayloadDescriptor,
+    # ReportDescriptor,
+    # ObjectID,
+    # Notification,
+    # ObjectTypes,
+    # DateTime,
+    # Duration,
+    # Problem,
 )
 from datetime import timedelta
 
@@ -251,3 +251,13 @@ def test_valid_resource(f: Path):
 @pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "interval"))
 def test_valid_interval(f: Path):
     check_valid(Interval, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "valuesMap"))
+def test_valid_valuesMap(f: Path):
+    check_valid(ValuesMap, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "point"))
+def test_valid_point(f: Path):
+    check_valid(Point, f)

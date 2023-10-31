@@ -1,0 +1,5 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/valuesMap
+{
+  "type": "arbitrary string",
+  "values": [1, 1.1, "string", { "x": 1.1, "y": 2.2 }, true, false],
+}
