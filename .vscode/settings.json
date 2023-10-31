@@ -10,6 +10,13 @@
   },
   "bashIde.shellcheckArguments": "--source-path=SCRIPTDIR  --external-sources",
   "python.terminal.activateEnvironment": false,
-  "cSpell.words": ["vens"],
+  "cSpell.words": [
+    "datetime",
+    "oadr",
+    "openapi",
+    "pydantic",
+    "timedelta",
+    "vens"
+  ],
   "python.analysis.importFormat": "relative"
 }
