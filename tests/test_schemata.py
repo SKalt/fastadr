@@ -25,8 +25,8 @@ from src.schemata import (
     ReportPayloadDescriptor,
     ReportDescriptor,
     Notification,
-    # ObjectTypes,
-    # Problem,
+    # ObjectTypes: not testing enum
+    # Problem: not testing since the server will only ever send it, not receive it
 )
 from datetime import timedelta
 
