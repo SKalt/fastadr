@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/event
+{
+  "id": "event-123", # required, not nullable
+  "programID": "program-345", # required, not nullable
+  "intervals": [], # required
+}

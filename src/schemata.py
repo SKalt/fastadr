@@ -216,25 +216,58 @@ class Resource(BaseModel):
     A resource is an energy device or system subject to control by a VEN.
     """
 
-    id: Optional[ObjectID]
-    createdDateTime: Optional[DateTime]
-    modificationDateTime: Optional[DateTime]
+    id: ObjectID = ""  # FIXME: sensible default
+    createdDateTime: Optional[DateTime] = None
+    modificationDateTime: Optional[DateTime] = None
     objectType: Literal["RESOURCE"] = ObjectTypes.RESOURCE.value
     """Used as discriminator, e.g. notification.object"""
-    resourceName: Optional[str | None] = None
+    resourceName: Optional[str] = None
     """
     User generated identifier, resource may be configured with identifier out-of-band.
     """
-    venID: Optional[ObjectID]
-    attributes: Optional[list[ValuesMap]]
+    venID: ObjectID = ""  # FIXME: sensible default
+    attributes: list[ValuesMap] = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing attributes."""
 
 
 class HTTPMethod(Enum):
+    """
+    > HTTP defines a set of request methods to indicate the desired action to be performed for a given resource.
+    >
+    > -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+
+    OpenADR 3 enumerates a subset of all HTTP methods, omitting `PATCH`,
+    `HEAD`, `CONNECT`, and `OPTIONS`.
+    """
+
     GET = "GET"
+    """
+    > Requests a representation of the specified resource. Requests using GET should only retrieve data.
+    >
+    > -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods#get
+    """
+
     POST = "POST"
+    """
+    > submits an entity to the specified resource, often causing a change in state or side effects on the server.
+    >
+    > -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods#post
+    """
+
     PUT = "PUT"
+    """
+    > replaces all current representations of the target resource with the request payload.
+    >
+    > -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods#put
+    """
+
     DELETE = "DELETE"
+    """
+    > deletes the specified resource.
+    >
+    > -- https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods#delete
+    """
+    # see note in ANNOTATED.yaml asking about "PATCH"
 
 
 class Notification(BaseModel):
@@ -436,7 +469,7 @@ class Program(BaseModel):
 class VEN(BaseModel):
     """VEN represents a client with the ven role."""
 
-    id: Optional[ObjectID] = None
+    id: ObjectID = ""  # FIXME: reasonable default.
     # ^ if the `id`` key is present, then the value must be present
     creationDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None

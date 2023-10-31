@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/resource
+{
+  "id": "resource-123", # omissible identifier
+  "createdDateTime": "3000-01-01T00:00:00Z",
+  "modificationDateTime": "1970-01-01T00:00:00Z",
+  "objectType": "RESOURCE",
+  "resourceName": "Call me Ishmael. Some years ago—never mind how long precisely— ... that in her retracing search after her missing children, only found another orphan.",
+  # ^ required, unrestricted
+  venID: "ven-123", # omissible identifier
+  attributes: [
+  # omissible, non-nullable
+    {type: "arbitrary attribute", values: ["arbitrary value"]},
+  ],
+  targets: [
+    # omissible, non-nullable
+    {type: "arbitrary target", values: ["arbitrary value"]},
+  ]
+}

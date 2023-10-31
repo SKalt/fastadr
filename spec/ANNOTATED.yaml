@@ -2300,6 +2300,9 @@ components:
       description: datetime in ISO 8601 format
       example: 2023-06-15T09:30:00Z
       # note: the 2_.. Definition pdf disagrees about ISO-8601 format
+      # on page 7-9 for each of the createdDateTime and modificationDateTime and 
+      # modificationDateTime fields
+      # Also, the code figure on page 14.
       nullable: true
       default: null
     duration:
