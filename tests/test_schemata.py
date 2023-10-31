@@ -18,7 +18,7 @@ from src.schemata import (
     Event,
     Subscription,
     Resource,
-    # Interval
+    Interval,
     # ValuesMap
     # Point
     # EventPayloadDescriptor
@@ -246,3 +246,8 @@ def test_valid_subscription(f: Path):
 @pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "resource"))
 def test_valid_resource(f: Path):
     check_valid(Resource, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "interval"))
+def test_valid_interval(f: Path):
+    check_valid(Interval, f)

@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/interval
+{
+  "id": 1000,
+  "payloads":
+    [
+      {
+        "type": "arbitrary string",
+        "values": [1, 1.1, "string", { "x": 1.1, "y": 2.2 }],
+      },
+    ],
+  "intervalPeriod":
+    {
+      "start": "2021-06-10T15:04:05Z",
+      "duration": "PT100H",
+      "randomizeStart": "P1Y2M10DT2H30M",
+    },
+}
