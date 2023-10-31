@@ -277,9 +277,9 @@ class Subscription(BaseModel):
     updated, or deleted.
     """
 
-    id: Optional[ObjectID]
-    createdDateTime: Optional[DateTime]
-    modificationDateTime: Optional[DateTime]
+    id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
+    createdDateTime: Optional[DateTime] = None
+    modificationDateTime: Optional[DateTime] = None
     objectType: Literal["SUBSCRIPTION"] = ObjectTypes.SUBSCRIPTION.value
     clientName: Optional[str] = None
     programID: Optional[ObjectID] = None

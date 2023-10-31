@@ -1,6 +1,7 @@
 openapi: 3.0.0
 # FIXME: use https://spec.openapis.org/oas/latest.html (v3.1.0 since 2021-02,
 # and I'm writing this note as of 2023-10)
+# note that Swagger supports OpenAPI 3.1.x as of 2023-06: https://swagger.io/blog/swagger-supports-openapi-3-1/ 
 servers:
   - description: base path
     url: http://localhost:8081/openadr3
@@ -1664,7 +1665,7 @@ components:
         principalSubdivision:
           type: string
           description: Coding per ISO 3166-2. E.g. state in US.
-          # FIXME: specify constraints: 1 <= lengh <=3, alphanumeric
+          # FIXME: specify constraints: 1 <= length <=3, alphanumeric
           example: CO
           nullable: true
           default: null
@@ -1718,7 +1719,7 @@ components:
           default: null
           items:
             $ref: "#/components/schemas/valuesMap"
-    # TODO: specify how to add additional extension properties as in 2_.. Defintion section _
+    # TODO: specify how to add additional extension properties as in 2_.. Definition section _
     # for inspiration, see https://spec.openapis.org/oas/latest.html#specification-extensions
     report:
       type: object
@@ -1915,6 +1916,7 @@ components:
                   description: object operation to subscribe to.
                   example: POST
                   enum: [GET, POST, PUT, DELETE]
+                  # no "PATCH"? https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
               callbackUrl:
                 type: string
                 format: uri
@@ -2306,7 +2308,7 @@ components:
       # FIXME: add `format` property? See https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
       # see also: https://swagger.io/specification/#data-type-format
       # practically, `pydantic` generates {"format": "duration", "type": "string"}
-      # TODO: check whether ISO-8601 time intervals parse to timedeltas.
+      # TODO: check whether ISO-8601 time intervals parse to `timedelta`s.
       # For example, ISO-8601 (probably) specifies these formats:
       # > Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
       # > Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"

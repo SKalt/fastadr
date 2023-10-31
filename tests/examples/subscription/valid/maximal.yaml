@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/subscription
+{
+  createdDateTime: "2021-06-10T00:00:01Z", # omissible, nullable
+  modificationDateTime: "1970-01-01T00:00:00Z", # omissible, nullable
+  clientName: "🎃🎃🎃🎃", # required, nullable, unrestricted
+  programID: "program-123", # required, non-null, 1-128 identifier characters
+  objectOperations: [
+    {
+      "objects": [
+        "PROGRAM",
+        "EVENT",
+        "REPORT",
+        "VEN",
+      ],
+      "operations": [
+        "GET","PUT", "POST", "DELETE"
+      ],
+      "callbackUrl": "https://example.com/callback/",
+      "bearerToken": "ABCDEF12345676890", # omissible, nullable
+    }
+  ], # required, non-null
+  "targets": [
+    {
+     "type": "A Thing",
+     "values": ["A Value for the Thing"]
+    }
+  ], # omissible, nullable
+}
