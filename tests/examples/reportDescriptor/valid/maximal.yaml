@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/reportDescriptor
+{
+  "payloadType": "USAGE", # required, unrestricted
+  "readingType": "DIRECT_READ", # omissible, unrestricted
+  "targets": [{ "type": "...", "values": ["..."] }], # omissible, nullable
+  "aggregate": true, # omissible
+  "startInterval": 2147483647, # omissible int32
+  "numIntervals": -2147483648, # omissible int32
+  "historical": true, # omissible
+  "frequency": 2147483647, # omissible int32
+  "repeat": -2147483648, # omissible int32
+}

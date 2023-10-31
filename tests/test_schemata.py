@@ -23,15 +23,13 @@ from src.schemata import (
     Point,
     EventPayloadDescriptor,
     ReportPayloadDescriptor,
-    # ReportDescriptor,
-    # ObjectID,
-    # Notification,
+    ReportDescriptor,
+    Notification,
     # ObjectTypes,
-    # DateTime,
-    # Duration,
     # Problem,
 )
 from datetime import timedelta
+
 
 _this_dir = Path(__file__).parent
 REPO_ROOT = _this_dir.parent
@@ -282,3 +280,13 @@ def test_valid_reportPayloadDescriptor(f: Path):
 )
 def test_invalid_reportPayloadDescriptor(f: Path):
     check_invalid(ReportPayloadDescriptor, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "reportDescriptor"))
+def test_valid_reportDescriptor(f: Path):
+    check_valid(ReportDescriptor, f)
+
+
+@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "notification"))
+def test_valid_notification(f: Path):
+    check_valid(Notification, f)
