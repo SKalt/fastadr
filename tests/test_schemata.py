@@ -28,7 +28,6 @@ from src.schemata import (
     # ObjectTypes: not testing enum
     # Problem: not testing since the server will only ever send it, not receive it
 )
-from datetime import timedelta
 
 
 _this_dir = Path(__file__).parent
@@ -47,7 +46,7 @@ class Validator(Protocol):
         ...
 
 
-def check_valid(model: Validator, file: Path):
+def _check_valid_document(model: Validator, file: Path):
     try:
         model.model_validate_json(get_json(file))
     except ValidationError as e:
@@ -57,7 +56,7 @@ def check_valid(model: Validator, file: Path):
 
 # note: I'm using a custom check instead of pydantic.raises(ValidationError) in order to
 # ensure that the file name is included in the error message
-def check_invalid(model: Validator, file: Path):
+def _check_invalid(model: Validator, file: Path):
     try:
         model.model_validate_json(get_json(file))
         assert False, f"expected {file.relative_to(REPO_ROOT)} to be invalid"
@@ -65,7 +64,7 @@ def check_invalid(model: Validator, file: Path):
         pass  # expected
 
 
-def get_examples(example_dir: Path, *, ok: bool) -> list[Path]:
+def _get_examples(example_dir: Path, *, ok: bool) -> list[Path]:
     d = example_dir / ("valid" if ok else "invalid")
     assert d.exists() and d.is_dir()
     examples = [f for f in d.glob("*.yaml")]
@@ -73,23 +72,44 @@ def get_examples(example_dir: Path, *, ok: bool) -> list[Path]:
     return examples
 
 
-def get_valid_examples(example_dir: Path) -> list[Path]:
-    return get_examples(example_dir, ok=True)
+def _get_valid_examples(example_dir: Path) -> list[Path]:
+    return _get_examples(example_dir, ok=True)
 
 
-def get_invalid_examples(example_dir: Path) -> list[Path]:
-    return get_examples(example_dir, ok=False)
+def _get_invalid_examples(example_dir: Path) -> list[Path]:
+    return _get_examples(example_dir, ok=False)
 
 
-def test_duration():
-    validator = TypeAdapter(Duration)
-    assert validator.json_schema() == {"format": "duration", "type": "string"}
-    val = validator.validate_json('"PT1H"')
-    assert val == timedelta(hours=1)
+_DurationValidator = TypeAdapter(Duration)
+
+
+@pytest.mark.parametrize(
+    "iso_8601_duration",
+    [
+        "PT1H",
+    ],
+)
+def test_duration(iso_8601_duration: str):
+    assert _DurationValidator.json_schema() == {"format": "duration", "type": "string"}
+    _DurationValidator.validate_json('"' + iso_8601_duration + '"')
+
+
+@pytest.mark.parametrize(
+    "iso_8601_interval",
+    [
+        "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z",
+        "2007-03-01T13:00:00Z/P1Y2M10DT2H30M",
+        "P1Y2M10DT2H30M/2008-05-11T15:30:00Z",
+    ],
+)
+def test_duration_does_not_accept_iso8601_intervals(iso_8601_interval: str):
     with pytest.raises(ValidationError):
-        # Duration shouldn't accept integers
-        # FIXME: nicer error message specifying ISO-8601 format
-        validator.validate_json("3600")
+        _DurationValidator.validate_json('"' + iso_8601_interval + '"')
+
+
+def test_ints_not_accepted_as_duration():
+    with pytest.raises(ValidationError):
+        _DurationValidator.validate_json("1.0")
 
 
 def test_datetime():
@@ -186,112 +206,105 @@ def test_interval_period():
     )
 
 
-def test_ven():
-    examples_dir = FIXTURES_DIR / "VEN"
-    assert examples_dir.exists() and examples_dir.is_dir()
-    valid_examples = [f for f in (examples_dir / "valid").glob("*.yaml")]
-    assert len(valid_examples)
-    for f in valid_examples:
-        try:
-            VEN.model_validate_json(get_json(f))
-        except ValidationError as e:
-            e.add_note(f"file: {f.relative_to(REPO_ROOT)}")
-            raise e
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "ven"))
+def test_valid_ven(f: Path):
+    _check_valid_document(VEN, f)
+
+
+@pytest.mark.parametrize("f", _get_invalid_examples(FIXTURES_DIR / "ven"))
+def test_invalid_ven(f: Path):
+    _check_invalid(VEN, f)
+
+
+def test_weird_ven():
     # weird-yet-valid cases:
     VEN(objectType="VEN")  # all defaults -- many of which are surprisingly null/None
     VEN(venName=None, objectType="VEN")  # - venName is required, but can be null/None
     VEN(venName="", objectType="VEN")  # - venName is required, but can be empty string
-    invalid_examples = [f for f in (examples_dir / "invalid").glob("*.yaml")]
-    assert len(invalid_examples) > 0
-    for f in invalid_examples:
-        with pytest.raises(ValidationError):
-            VEN.model_validate_json(get_json(f))
 
 
-program_examples_dir = FIXTURES_DIR / "program"
-
-
-@pytest.mark.parametrize("f", get_valid_examples(program_examples_dir))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "program"))
 def test_valid_program(f: Path):
-    check_valid(Program, f)
+    _check_valid_document(Program, f)
 
 
-@pytest.mark.parametrize("f", get_invalid_examples(program_examples_dir))
+@pytest.mark.parametrize("f", _get_invalid_examples(FIXTURES_DIR / "program"))
 def test_invalid_program(f: Path):
-    check_invalid(Program, f)
+    _check_invalid(Program, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "report"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "report"))
 def test_report(f: Path):
-    check_valid(Report, f)
+    _check_valid_document(Report, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "event"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "event"))
 def test_valid_event(f: Path):
-    check_valid(Event, f)
+    _check_valid_document(Event, f)
 
 
+# TODO: generate interesting invalid event examples
 # @pytest.mark.parametrize("f", get_invalid_examples(FIXTURES_DIR / "event"))
 # def test_invalid_event(f: Path):
 #     check_invalid(Event, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "subscription"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "subscription"))
 def test_valid_subscription(f: Path):
-    check_valid(Subscription, f)
+    _check_valid_document(Subscription, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "resource"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "resource"))
 def test_valid_resource(f: Path):
-    check_valid(Resource, f)
+    _check_valid_document(Resource, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "interval"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "interval"))
 def test_valid_interval(f: Path):
-    check_valid(Interval, f)
+    _check_valid_document(Interval, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "valuesMap"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "valuesMap"))
 def test_valid_valuesMap(f: Path):
-    check_valid(ValuesMap, f)
+    _check_valid_document(ValuesMap, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "point"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "point"))
 def test_valid_point(f: Path):
-    check_valid(Point, f)
+    _check_valid_document(Point, f)
 
 
 @pytest.mark.parametrize(
-    "f", get_valid_examples(FIXTURES_DIR / "eventPayloadDescriptor")
+    "f", _get_valid_examples(FIXTURES_DIR / "eventPayloadDescriptor")
 )
 def test_valid_eventPayloadDescriptor(f: Path):
-    check_valid(EventPayloadDescriptor, f)
+    _check_valid_document(EventPayloadDescriptor, f)
 
 
 @pytest.mark.parametrize(
-    "f", get_valid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
+    "f", _get_valid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
 )
 def test_valid_reportPayloadDescriptor(f: Path):
-    check_valid(ReportPayloadDescriptor, f)
+    _check_valid_document(ReportPayloadDescriptor, f)
 
 
 @pytest.mark.parametrize(
-    "f", get_invalid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
+    "f", _get_invalid_examples(FIXTURES_DIR / "reportPayloadDescriptor")
 )
 def test_invalid_reportPayloadDescriptor(f: Path):
-    check_invalid(ReportPayloadDescriptor, f)
+    _check_invalid(ReportPayloadDescriptor, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "reportDescriptor"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "reportDescriptor"))
 def test_valid_reportDescriptor(f: Path):
-    check_valid(ReportDescriptor, f)
+    _check_valid_document(ReportDescriptor, f)
 
 
-@pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "notification"))
+@pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "notification"))
 def test_valid_notification(f: Path):
-    check_valid(Notification, f)
+    _check_valid_document(Notification, f)
 
 
-@pytest.mark.parametrize("f", get_invalid_examples(FIXTURES_DIR / "notification"))
+@pytest.mark.parametrize("f", _get_invalid_examples(FIXTURES_DIR / "notification"))
 def test_invalid_notification(f: Path):
-    check_invalid(Notification, f)
+    _check_invalid(Notification, f)

@@ -2317,7 +2317,7 @@ components:
       # FIXME: add `format` property? See https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
       # see also: https://swagger.io/specification/#data-type-format
       # practically, `pydantic` generates {"format": "duration", "type": "string"}
-      # TODO: check whether ISO-8601 time intervals parse to `timedelta`s.
+      # TODO: suggest using ISO-8601 time intervals
       # For example, ISO-8601 (probably) specifies these formats:
       # > Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
       # > Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"
