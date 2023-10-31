@@ -4,7 +4,6 @@
     "EditorConfig.EditorConfig",
     "timonwong.shellcheck",
     "mads-hartmann.bash-ide-vscode",
-    "ms-python.isort",
     "charliermarsh.ruff",
     "tamasfe.even-better-toml"
   ]
