@@ -290,3 +290,8 @@ def test_valid_reportDescriptor(f: Path):
 @pytest.mark.parametrize("f", get_valid_examples(FIXTURES_DIR / "notification"))
 def test_valid_notification(f: Path):
     check_valid(Notification, f)
+
+
+@pytest.mark.parametrize("f", get_invalid_examples(FIXTURES_DIR / "notification"))
+def test_invalid_notification(f: Path):
+    check_invalid(Notification, f)

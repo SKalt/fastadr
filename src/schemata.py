@@ -272,26 +272,6 @@ class HTTPMethod(Enum):
     # see note in ANNOTATED.yaml asking about "PATCH"
 
 
-class Notification(BaseModel):
-    """
-    VTN generated object included in request to subscription callbackUrl.
-    """
-
-    objectType: ObjectTypes
-    operation: HTTPMethod
-    """
-    The operation on on object that triggered the notification.
-    """
-    targets: Optional[list[ValuesMap]] = None
-    """
-    A list of valuesMap objects.
-    """
-    object: Union["Program", "Event", "Report", "Subscription", Resource, "VEN"]
-    """
-    the object that is the subject of the notification.
-    """
-
-
 class ObjectOperationSub(BaseModel):
     objects: list[ObjectTypes]
     operations: list[HTTPMethod]
@@ -491,3 +471,25 @@ class VEN(BaseModel):
     targets: Optional[list[ValuesMap]] = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing target criteria."""
     resources: Optional[list[Resource]] = None
+
+
+class Notification(BaseModel):
+    """
+    VTN generated object included in request to subscription callbackUrl.
+    """
+
+    objectType: ObjectTypes
+    operation: HTTPMethod
+    """
+    The operation on on object that triggered the notification.
+    """
+    targets: Optional[list[ValuesMap]] = None
+    """
+    A list of valuesMap objects.
+    """
+    object: Union[Program, Event, Report, Subscription, Resource, VEN] = Field(
+        ..., discriminator="objectType"
+    )
+    """
+    the object that is the subject of the notification.
+    """

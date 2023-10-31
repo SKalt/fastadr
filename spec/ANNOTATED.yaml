@@ -2282,7 +2282,8 @@ components:
         object:
           type: object
           description: the object that is the subject of the notification.
-          example: {}
+          example: {} # FIXME:<- not a valid program/report/event/etc: all of
+          # them have required fields, and `{}` is lacking the discriminator field.
           oneOf:
             - $ref: "#/components/schemas/program"
             - $ref: "#/components/schemas/report"
