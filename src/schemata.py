@@ -26,7 +26,7 @@ class OAuthScopes(Enum):
     """VENS and BL can write to vens and resources"""
 
 
-Duration = Annotated[timedelta, str, Strict()]  # FIXME: validate ISO 8601 format
+Duration = Annotated[timedelta, str, Strict()]
 """duration in ISO 8601 format"""
 
 DateTime = Annotated[datetime, str, Strict()]

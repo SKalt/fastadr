@@ -1,5 +1,5 @@
 openapi: 3.0.0
-# FIXME: use https://spec.openapis.org/oas/latest.html (v3.1.0 since 2021-02,
+# TODO: suggest using https://spec.openapis.org/oas/latest.html (v3.1.0 since 2021-02,
 # and I'm writing this note as of 2023-10)
 # note that Swagger supports OpenAPI 3.1.x as of 2023-06: https://swagger.io/blog/swagger-supports-openapi-3-1/
 servers:
@@ -1658,14 +1658,14 @@ components:
         country:
           type: string
           description: Alpha-2 code per ISO 3166-1.
-          # FIXME: include restriction pattern (2 alphabetic chars).
+          # TODO: suggest including a restriction pattern (2 alphabetic chars).
           example: US
           nullable: true
           default: null
         principalSubdivision:
           type: string
           description: Coding per ISO 3166-2. E.g. state in US.
-          # FIXME: specify constraints: 1 <= length <=3, alphanumeric
+          # TODO: suggest specifying constraints: 1 <= length <=3, alphanumeric
           example: CO
           nullable: true
           default: null
@@ -1703,7 +1703,7 @@ components:
           default: false
         payloadDescriptors:
           type: array
-          description: A list of payloadDescriptors. # FIXME: ambiguous
+          description: A list of payloadDescriptors. # TODO: suggest expanding description
           nullable: true
           default: null
           items:
@@ -1825,7 +1825,7 @@ components:
           nullable: true
           default: null
         priority:
-          type: integer # FIXME: how to handle negatives?
+          type: integer # TODO: clarify how to handle negatives?
           description: Relative priority of event. A lower number is a higher priority.
           example: 0
           nullable: true
@@ -2037,7 +2037,7 @@ components:
         intervalPeriod:
           $ref: "#/components/schemas/intervalPeriod"
           # Defines default start and durations of intervals.
-          # FIXME: what's the default value for this omissible field?
+          # TODO: what's the default value for this omissible field?
         payloads:
           type: array
           description: A list of valuesMap objects.
@@ -2049,6 +2049,14 @@ components:
         Defines temporal aspects of intervals.
         A duration of default null indicates infinity.
         A randomizeStart of default null indicates no randomization.
+      # TODO: suggest using ISO-8601 time intervals
+      # For example, ISO-8601 (probably) specifies these formats:
+      # > Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
+      # > Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"
+      # > Duration and end, such as "P1Y2M10DT2H30M/2008-05-11T15:30:00Z"
+      # > Duration only, such as "P1Y2M10DT2H30M", with additional context information
+      # >
+      # > -- https://en.wikipedia.org/wiki/ISO_8601
       required:
         - start
       properties:
@@ -2312,19 +2320,11 @@ components:
       nullable: true
       default: null
     duration:
-      type: string # FIXME: validate ISO 8601 format with a regex
+      type: string # TODO: suggest validating ISO 8601 format with a regex
       description: duration in ISO 8601 format
-      # FIXME: add `format` property? See https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
+      # TODO: suggest adding `format` property? See https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-validation-00#section-7.3
       # see also: https://swagger.io/specification/#data-type-format
       # practically, `pydantic` generates {"format": "duration", "type": "string"}
-      # TODO: suggest using ISO-8601 time intervals
-      # For example, ISO-8601 (probably) specifies these formats:
-      # > Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
-      # > Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"
-      # > Duration and end, such as "P1Y2M10DT2H30M/2008-05-11T15:30:00Z"
-      # > Duration only, such as "P1Y2M10DT2H30M", with additional context information
-      # >
-      # > -- https://en.wikipedia.org/wiki/ISO_8601
       example: PT1H
       nullable: true
       default: null
