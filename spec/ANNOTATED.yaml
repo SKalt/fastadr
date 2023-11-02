@@ -1,7 +1,18 @@
 openapi: 3.0.0
 # TODO: suggest using https://spec.openapis.org/oas/latest.html (v3.1.0 since 2021-02,
-# and I'm writing this note as of 2023-10)
+# and I'm writing this note as of 2023-10). Using OpenAPI 3.1 would simplify writing nullable values
+# from JSON-schema extensions like {"nullable": true} to the JSON schema 2020-12 spec ({"types": ["null", {"$ref": "#/components/schemas/..."}]})
+# I believe using the latter notation clarifies which items are can be null, but that's just, like, my opinion man.
+# The objective truth is that writing JSON-schema-native code makes validation using JSON schema possible.
+# In addition to the safety benefits of facilitating validation of each of the schemas, many
+# developer tools like [VSCode's JSON completion and validation](https://code.visualstudio.com/Docs/languages/json#_intellisense-and-validation),
+# [`yaml-language-server`](https://github.com/redhat-developer/yaml-language-server)
+# and [`taplo`](https://taplo.tamasfe.dev/) rely on JSON schema for linting.
+#
 # note that Swagger supports OpenAPI 3.1.x as of 2023-06: https://swagger.io/blog/swagger-supports-openapi-3-1/
+# Postman also supports OpenAPI 3.1.x as of 2022: https://blog.postman.com/postman-now-supports-openapi-3-1/
+# AWS API Gateway won't accept defining a service in OpenAPI 3.1 yet: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-open-api.html
+# however, that doesn't prevent implementing OpenADR 3.0.0 using AWS API Gateway!
 servers:
   - description: base path
     url: http://localhost:8081/openadr3
@@ -64,8 +75,11 @@ paths:
       security:
         - oAuth2ClientCredentials: [read_all]
         # bearerAuth added here and elsewhere to support RI /ui service. See RI README for description of /ui
+        ## TODO: expand RI to Reference Implementation, possibly add a link to the repo?
         - bearerAuth: []
       parameters:
+        # Q: should searching programs by other properties (name, country, state, etc) be implemented
+        # outside of this API route?
         - name: targetType
           in: query
           description: Indicates targeting type, e.g. GROUP
@@ -92,7 +106,7 @@ paths:
           in: query
           description: maximum number of records to return.
           required: false
-          schema:
+          schema: # TODO: default value?
             type: integer
             format: int32
             maximum: 50
@@ -128,7 +142,7 @@ paths:
       tags:
         - programs
       summary: create a program
-      operationId: createProgram
+      operationId: createProgram # Nitpick: why is the path plural (/programs) while the payload is singular?
       description: Create a new program in the server.
       security:
         - oAuth2ClientCredentials: [write_programs]
@@ -160,6 +174,7 @@ paths:
                 $ref: "#/components/schemas/problem"
         "409":
           description: Conflict. Implementation dependent response if program with the same programName exists.
+          # why throw conflict-errors on programName and not program.id?
           content:
             application/json:
               schema:
@@ -275,7 +290,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/program"
-        "400":
+        "400": # TODO: what about a 404 response for nonexistent programs?
           description: Bad Request.
           content:
             application/json:
@@ -314,6 +329,7 @@ paths:
           required: false
           description: filter results to reports with programID.
           example: program-999
+        # should programID and clientName be AND'ed or OR'ed?
         - name: clientName
           in: query
           schema:
@@ -490,6 +506,7 @@ paths:
                 $ref: "#/components/schemas/problem"
         "409":
           description: Conflict. Implementation dependent response if program with the same programName exists.
+          # FIXME: correct "if program with the same programName exists": this is a report endpoint!
           content:
             application/json:
               schema:
@@ -564,7 +581,7 @@ paths:
           in: query
           description: List of target values, e.g. group names
           required: false
-          schema:
+          schema: # Q: how are is the array encoded? comma-separated? repetition? JSON?
             type: array
             items:
               type: string
@@ -647,7 +664,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/problem"
         "409":
+          # nitpick: double-space
           description: Conflict. Implementation dependent response if event with  same name already exists.
+          # Q: again, why throw conflicts on event.name and not event.id?
           content:
             application/json:
               schema:
@@ -985,7 +1004,7 @@ paths:
     put:
       tags:
         - subscriptions
-      summary: update  subscription
+      summary: update  subscription # nitpick: double-space
       operationId: updateSubscription
       description: Update the subscription specified by subscriptionID specified in path.
       security:
@@ -1018,6 +1037,7 @@ paths:
                 $ref: "#/components/schemas/problem"
         "409":
           description: Conflict. Implementation dependent response if program with the same programName exists.
+          # FIXME: 'program' in 'subscription' endpoint --------------^^^^^^^
           content:
             application/json:
               schema:
@@ -1031,7 +1051,7 @@ paths:
     delete:
       tags:
         - subscriptions
-      summary: delete  subscription
+      summary: delete  subscription # nitpick: double-space
       operationId: deleteSubscription
       description: Delete the subscription specified by subscriptionID specified in path.
       security:
@@ -1228,7 +1248,7 @@ paths:
     put:
       tags:
         - vens
-      summary: update  ven
+      summary: update  ven # nitpick: double-space
       operationId: updateVen
       description: Update the ven specified by venID specified in path.
       security:
@@ -1274,7 +1294,7 @@ paths:
     delete:
       tags:
         - vens
-      summary: delete  ven
+      summary: delete  ven # nitpick: double-space
       operationId: deleteVen
       description: Delete the ven specified by venID specified in path.
       security:
@@ -1417,7 +1437,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/problem"
-        "409":
+        "409": # nitpick: double-space
           description: Conflict. Implementation dependent response if resource with  same resourceIdentifier already exists.
           content:
             application/json:
@@ -1480,7 +1500,7 @@ paths:
     put:
       tags:
         - vens
-      summary: update  ven resource
+      summary: update  ven resource # nitpick: double-space
       operationId: updateVenResource
       description: Update the ven resource specified by venID and resourceID specified in path.
       security:
@@ -1526,7 +1546,7 @@ paths:
     delete:
       tags:
         - vens
-      summary: delete  ven resource
+      summary: delete  ven resource # nitpick: double-space
       operationId: deleteVenResource
       description: Delete the ven resource specified by venID and resourceID specified in path.
       security:
@@ -1672,6 +1692,7 @@ components:
         timeZoneOffset:
           $ref: "#/components/schemas/duration"
           # Number of hours different from UTC for the standard time applicable to the program.
+          # Q: how to represent UTC-5?
         intervalPeriod:
           $ref: "#/components/schemas/intervalPeriod"
           # The temporal span of the program, could be years long.
