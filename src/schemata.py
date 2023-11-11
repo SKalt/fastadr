@@ -3,7 +3,7 @@
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Sequence, Union
 
 import annotated_types
 from pydantic import BaseModel, Field, StrictFloat, StringConstraints, Strict
@@ -11,6 +11,7 @@ from pydantic_core import Url
 from .values_map import AnyValuesMap
 from .event_types import EventValues
 from .report_types import ReportValues
+from .resource_types import Attribute
 
 
 class OAuthScopes(StrEnum):
@@ -207,7 +208,7 @@ class Resource(BaseModel):
     User generated identifier, resource may be configured with identifier out-of-band.
     """
     venID: ObjectID = ""  # FIXME: sensible default
-    attributes: list[AnyValuesMap] = Field(default_factory=lambda: [])  # TODO: ???
+    attributes: Sequence[Attribute] = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing attributes."""
 
 
@@ -481,7 +482,7 @@ class VEN(BaseModel):
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.
     """
-    attributes: list[AnyValuesMap] = Field(default_factory=lambda: [])  # TODO: narrow
+    attributes: Sequence[Attribute] = Field(default_factory=lambda: [])
     """ A list of valuesMap objects describing attributes."""
     targets: Optional[list[AnyValuesMap]] = Field(
         default_factory=lambda: []
