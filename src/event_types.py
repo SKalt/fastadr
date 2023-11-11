@@ -10,7 +10,7 @@ from .values_map import (
     ValuesMap,
     AnyValue,
     AnyValuesMap,
-    HumanReadableStr,
+    NonEmptyStr,
 )
 from .values_map import Point
 
@@ -19,10 +19,7 @@ Portion = Annotated[float, annotated_types.Ge(0.0), annotated_types.Le(1.0)]
 
 
 class EventKind(StrEnum):
-    """
-    Enumerated values for eventKind.
-    """
-
+    # TODO: document where these come from and where they occur
     SIMPLE = "SIMPLE"
     PRICE = "PRICE"
     CHARGE_STATE_SETPOINT = "CHARGE_STATE_SETPOINT"
@@ -202,7 +199,7 @@ ExportCapacityLimit = ValuesMap[Literal[EventKind.EXPORT_CAPACITY_LIMIT], One[fl
 > is indicated by units in associated eventPayloadDescriptor
 """
 GridEmergencyAlert = ValuesMap[
-    Literal[EventKind.ALERT_GRID_EMERGENCY], MaybeOne[HumanReadableStr]
+    Literal[EventKind.ALERT_GRID_EMERGENCY], MaybeOne[NonEmptyStr]
 ]
 """
 > There is an imminent risk of the grid failing to continue supplying
@@ -210,16 +207,14 @@ GridEmergencyAlert = ValuesMap[
 > voltage), or ceasing to operate at all. Payload value contains a
 > human-readable string describing the alert.
 """
-BlackStartAlert = ValuesMap[
-    Literal[EventKind.ALERT_BLACK_START], MaybeOne[HumanReadableStr]
-]
+BlackStartAlert = ValuesMap[Literal[EventKind.ALERT_BLACK_START], MaybeOne[NonEmptyStr]]
 """
 > The grid is in the process of resuming full operation. Devices should
 > minimize electricity use until the event is cleared. Payload value
 > contains a human-readable string describing the alert.
 """
 PossibleOutageAlert = ValuesMap[
-    Literal[EventKind.ALERT_POSSIBLE_OUTAGE], MaybeOne[HumanReadableStr]
+    Literal[EventKind.ALERT_POSSIBLE_OUTAGE], MaybeOne[NonEmptyStr]
 ]
 """
 > Customers may lose grid power in the coming hours or days.
@@ -227,7 +222,7 @@ PossibleOutageAlert = ValuesMap[
 > Shutoffs (usually from fire risk). Payload value contains a
 > human-readable string describing the alert
 """
-FlexAlert = ValuesMap[Literal[EventKind.ALERT_FLEX_ALERT], MaybeOne[HumanReadableStr]]
+FlexAlert = ValuesMap[Literal[EventKind.ALERT_FLEX_ALERT], MaybeOne[NonEmptyStr]]
 """
 > Power supply will be scarce during the event. Devices should seek to
 > shift load to times before or after the event. Devices that can shed
@@ -235,37 +230,35 @@ FlexAlert = ValuesMap[Literal[EventKind.ALERT_FLEX_ALERT], MaybeOne[HumanReadabl
 > human-readable string describing the alert.
 > Note: See: https://flexalert.org
 """
-FireAlert = ValuesMap[Literal[EventKind.ALERT_FIRE], MaybeOne[HumanReadableStr]]
+FireAlert = ValuesMap[Literal[EventKind.ALERT_FIRE], MaybeOne[NonEmptyStr]]
 """
 > There is a substantial risk of fire in the area which could interrupt
 > electricity supply in addition to being a danger to life and property.
 > Payload value contains a human-readable string describing the alert.
 """
-FreezingAlert = ValuesMap[Literal[EventKind.ALERT_FREEZING], MaybeOne[HumanReadableStr]]
+FreezingAlert = ValuesMap[Literal[EventKind.ALERT_FREEZING], MaybeOne[NonEmptyStr]]
 """
 > There is (or is forecast to be) temperatures low enough to be of
 > concern. Payload value contains a human-readable string describing
 > the alert
 """
-WindAlert = ValuesMap[Literal[EventKind.ALERT_WIND], MaybeOne[HumanReadableStr]]
+WindAlert = ValuesMap[Literal[EventKind.ALERT_WIND], MaybeOne[NonEmptyStr]]
 """
 > There is (or is forecast to be) wind speeds high enough to be of
 > concern. Includes hurricanes. Payload value contains a
 > human-readable string describing the alert.
 """
-TsunamiAlert = ValuesMap[Literal[EventKind.ALERT_TSUNAMI], MaybeOne[HumanReadableStr]]
+TsunamiAlert = ValuesMap[Literal[EventKind.ALERT_TSUNAMI], MaybeOne[NonEmptyStr]]
 """
 > Tsunami waves expected to hit the coastline. Payload value contains a
 > human-readable string describing the alert.
 """
-AirQualityAlert = ValuesMap[
-    Literal[EventKind.ALERT_AIR_QUALITY], MaybeOne[HumanReadableStr]
-]
+AirQualityAlert = ValuesMap[Literal[EventKind.ALERT_AIR_QUALITY], MaybeOne[NonEmptyStr]]
 """
 > Air quality is or is forecast to be. Payload value contains a
 > human-readable string describing the alert
 """
-OtherAlert = ValuesMap[Literal[EventKind.ALERT_OTHER], MaybeOne[HumanReadableStr]]
+OtherAlert = ValuesMap[Literal[EventKind.ALERT_OTHER], MaybeOne[NonEmptyStr]]
 """
 No specific definition. See associated text data element. Payload value
 contains a human-readable string describing the alert

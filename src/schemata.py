@@ -12,6 +12,7 @@ from .values_map import AnyValuesMap
 from .event_types import EventValues
 from .report_types import ReportValues
 from .resource_types import Attribute
+from .target_types import Target
 
 
 class OAuthScopes(StrEnum):
@@ -120,7 +121,7 @@ class ReportDescriptor(BaseModel):
     """
     Enumerated or private string signifying the type of reading.
     """
-    targets: Optional[list[ReportValues]] = None
+    targets: Sequence[ReportValues] | None = None  # Q: what's the inner kind?
     """A list of valuesMap objects."""
     aggregate: bool = False
     """
@@ -279,9 +280,9 @@ class Subscription(BaseModel):
     objectType: Literal["SUBSCRIPTION"] = ObjectTypes.SUBSCRIPTION.value
     clientName: Optional[str] = None
     programID: Optional[ObjectID] = None
-    objectOperations: list[ObjectOperationSub]
+    objectOperations: Sequence[ObjectOperationSub]
     """list of objects and operations to subscribe to."""
-    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
+    targets: Sequence[Target] | None = None
     """A list of valuesMap objects. Used by server to filter callbacks."""
 
 
@@ -337,7 +338,7 @@ class Event(BaseModel):
     Relative priority of event. A lower number is a higher priority.
     """
 
-    targets: Optional[list[EventValues]] = None
+    targets: Optional[list[EventValues]] = None  # Q: what's the inner kind?
     """A list of valuesMap objects."""
 
     reportDescriptors: Optional[list[ReportDescriptor]] = None
@@ -465,7 +466,7 @@ class Program(BaseModel):
     ] = None
     """A list of payloadDescriptors"""
 
-    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
+    targets: Sequence[Target] | None = None
     """A list of valuesMap objects."""
 
 
@@ -484,9 +485,7 @@ class VEN(BaseModel):
     """
     attributes: Sequence[Attribute] = Field(default_factory=lambda: [])
     """ A list of valuesMap objects describing attributes."""
-    targets: Optional[list[AnyValuesMap]] = Field(
-        default_factory=lambda: []
-    )  # TODO: narrow
+    targets: Sequence[Target] | None = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing target criteria."""
     resources: Optional[list[Resource]] = None
 
@@ -502,7 +501,7 @@ class Notification(BaseModel):
     """
     The operation on on object that triggered the notification.
     """
-    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
+    targets: Sequence[Target] | None = None
     """
     A list of valuesMap objects.
     """

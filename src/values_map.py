@@ -21,7 +21,8 @@ Values = TypeVar("Values", bound=Sequence[AnyValue])
 Value = TypeVar("Value", bound=AnyValue)
 MaybeOne = Annotated[Sequence[Value], annotated_types.Len(min_length=0, max_length=1)]
 One = Annotated[Sequence[Value], annotated_types.Len(min_length=1, max_length=1)]
-HumanReadableStr = Annotated[str, annotated_types.Len(1, 1024 * 1024)]
+AtLeastOne = Annotated[Sequence[Value], annotated_types.Len(min_length=1)]
+NonEmptyStr = Annotated[str, annotated_types.Len(1, 1024 * 1024)]
 """A non-empty string of at most 1MB of UTF-8 encoded text."""
 
 

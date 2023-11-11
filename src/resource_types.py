@@ -3,7 +3,7 @@ from typing import Annotated, Literal, Sequence
 import annotated_types
 from pydantic import Field
 
-from .values_map import AnyValue, AnyValuesMap, One, ValuesMap, HumanReadableStr
+from .values_map import AnyValue, AnyValuesMap, One, ValuesMap, NonEmptyStr
 from enum import StrEnum
 
 
@@ -46,7 +46,7 @@ MaxPowerExport = ValuesMap[Literal[AttributeKind.MAX_POWER_EXPORT], One[float]]
 > Values contains a floating point number describing the maximum power the
 > device can export, in kiloWatts.
 """
-Description = ValuesMap[Literal[AttributeKind.DESCRIPTION], One[HumanReadableStr]]
+Description = ValuesMap[Literal[AttributeKind.DESCRIPTION], One[NonEmptyStr]]
 """
 > Free-form text tersely describing a ven or resource.
 """
