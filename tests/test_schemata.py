@@ -5,6 +5,7 @@ from pydantic import TypeAdapter, ValidationError
 from pydantic_core import Url
 import pytest
 from typing import Any, Protocol
+from src.values_map import Point, AnyValuesMap
 from src.schemata import (
     Duration,
     DateTime,
@@ -19,8 +20,6 @@ from src.schemata import (
     Subscription,
     Resource,
     Interval,
-    ValuesMap,
-    Point,
     EventPayloadDescriptor,
     ReportPayloadDescriptor,
     ReportDescriptor,
@@ -266,7 +265,7 @@ def test_valid_interval(f: Path):
 
 @pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "valuesMap"))
 def test_valid_valuesMap(f: Path):
-    _check_valid_document(ValuesMap, f)
+    _check_valid_document(AnyValuesMap, f)
 
 
 @pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "point"))

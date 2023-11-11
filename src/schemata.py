@@ -2,15 +2,18 @@
 # Duration = Annotated[timedelta]
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Literal, Optional, Union
 
 import annotated_types
 from pydantic import BaseModel, Field, StrictFloat, StringConstraints, Strict
 from pydantic_core import Url
+from .values_map import AnyValuesMap
+from .event_types import EventValues
+from .report_types import ReportValues
 
 
-class OAuthScopes(Enum):
+class OAuthScopes(StrEnum):
     # See page 10, section 7, "EndPoints" in file://./../spec/2_OpenADR%203.0%20Definition%20v3.0.0.pdf
     read_all = "read_all"
     """VENs and BL can read all resources"""
@@ -38,7 +41,6 @@ ObjectID = Annotated[
     str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$", min_length=1, max_length=128)
 ]
 """URL safe VTN assigned object ID."""
-# TODO: shouldn't ObjectID have at least one character?
 
 Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100), Strict()]
 
@@ -93,7 +95,7 @@ class ReportResource(BaseModel):
     """A list of interval objects."""
 
 
-class ObjectTypes(Enum):
+class ObjectTypes(StrEnum):
     PROGRAM = "PROGRAM"
     EVENT = "EVENT"
     REPORT = "REPORT"
@@ -101,35 +103,6 @@ class ObjectTypes(Enum):
     VEN = "VEN"
     RESOURCE = "RESOURCE"
     # EVENT_PAYLOAD_DESCRIPTOR = "EVENT_PAYLOAD_DESCRIPTOR"
-
-
-class Point(BaseModel):
-    """
-    A pair of floats typically used as a point on a 2 dimensional grid.
-    """
-
-    x: Optional[float] = None
-    """A value on an x axis."""
-    y: Optional[float] = None
-    """A value on a y axis."""
-
-
-# TODO: implement the `type` enumerations from page 15 of 2_OpenADR 3.0 Definition v3.0.0.pdf
-class ValuesMap(BaseModel):
-    """
-    Represents one or more values associated with a type.
-    E.g. a type of PRICE contains a single float value.
-    """
-
-    type: str
-    """
-    Enumerated or private string signifying the nature of values.
-    E.G. "PRICE" indicates value is to be interpreted as a currency.
-    """
-    values: list[int | float | str | bool | Point]
-    """
-    The value associated with the type.
-    """
 
 
 class ReportDescriptor(BaseModel):
@@ -146,7 +119,7 @@ class ReportDescriptor(BaseModel):
     """
     Enumerated or private string signifying the type of reading.
     """
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[ReportValues]] = None
     """A list of valuesMap objects."""
     aggregate: bool = False
     """
@@ -196,6 +169,7 @@ class IntervalPeriod(BaseModel):
     """a randomization time that may be applied to start."""
 
 
+# TODO: make generic over what kind of `valuesMaps` are allowed?
 class Interval(BaseModel):
     """
     An object defining a temporal window and a list of valuesMaps.
@@ -213,10 +187,11 @@ class Interval(BaseModel):
     """Defines default start and durations of intervals."""
     # TODO: clarify default value for omissible non-null intervalPeriod
 
-    payloads: list[ValuesMap]
+    payloads: list[AnyValuesMap]  # TODO: narrow
     """A list of valuesMap objects."""
 
 
+# TODO: make generic over what kind of `valuesMaps` are allowed?
 class Resource(BaseModel):
     """
     A resource is an energy device or system subject to control by a VEN.
@@ -232,11 +207,11 @@ class Resource(BaseModel):
     User generated identifier, resource may be configured with identifier out-of-band.
     """
     venID: ObjectID = ""  # FIXME: sensible default
-    attributes: list[ValuesMap] = Field(default_factory=lambda: [])
+    attributes: list[AnyValuesMap] = Field(default_factory=lambda: [])  # TODO: ???
     """A list of valuesMap objects describing attributes."""
 
 
-class HTTPMethod(Enum):
+class HTTPMethod(StrEnum):
     """
     > HTTP defines a set of request methods to indicate the desired action to be performed for a given resource.
     >
@@ -289,6 +264,7 @@ class ObjectOperationSub(BaseModel):
     """
 
 
+# TODO: make generic over what kinds of `valuesMaps` are allowed?
 class Subscription(BaseModel):
     """
     An object created by a client to receive notification of operations on objects.
@@ -304,7 +280,7 @@ class Subscription(BaseModel):
     programID: Optional[ObjectID] = None
     objectOperations: list[ObjectOperationSub]
     """list of objects and operations to subscribe to."""
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
     """A list of valuesMap objects. Used by server to filter callbacks."""
 
 
@@ -360,7 +336,7 @@ class Event(BaseModel):
     Relative priority of event. A lower number is a higher priority.
     """
 
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[EventValues]] = None
     """A list of valuesMap objects."""
 
     reportDescriptors: Optional[list[ReportDescriptor]] = None
@@ -431,6 +407,7 @@ class ReportPayloadDescriptor(BaseModel):
     """A quantification of the confidence in a set of payload values."""
 
 
+# TODO: make generic over what kinds of `valuesMaps` are allowed?
 class Program(BaseModel):
     """
     Provides program specific metadata from VTN to VEN.
@@ -487,10 +464,11 @@ class Program(BaseModel):
     ] = None
     """A list of payloadDescriptors"""
 
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
     """A list of valuesMap objects."""
 
 
+# TODO: make generic over what kinds of `valuesMaps` are allowed?
 class VEN(BaseModel):
     """VEN represents a client with the ven role."""
 
@@ -503,13 +481,16 @@ class VEN(BaseModel):
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.
     """
-    attributes: list[ValuesMap] = Field(default_factory=lambda: [])
+    attributes: list[AnyValuesMap] = Field(default_factory=lambda: [])  # TODO: narrow
     """ A list of valuesMap objects describing attributes."""
-    targets: Optional[list[ValuesMap]] = Field(default_factory=lambda: [])
+    targets: Optional[list[AnyValuesMap]] = Field(
+        default_factory=lambda: []
+    )  # TODO: narrow
     """A list of valuesMap objects describing target criteria."""
     resources: Optional[list[Resource]] = None
 
 
+# TODO: make generic over what kinds of `valuesMaps` are allowed?
 class Notification(BaseModel):
     """
     VTN generated object included in request to subscription callbackUrl.
@@ -520,7 +501,7 @@ class Notification(BaseModel):
     """
     The operation on on object that triggered the notification.
     """
-    targets: Optional[list[ValuesMap]] = None
+    targets: Optional[list[AnyValuesMap]] = None  # TODO: narrow
     """
     A list of valuesMap objects.
     """
