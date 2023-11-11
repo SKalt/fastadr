@@ -1,39 +1,39 @@
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Sequence
 
 from pydantic import Field
-from .values_map import AnyValue, ValuesMap, AnyValuesMap
+from .values_map import AnyValue, ValuesMap, AnyValuesMap, One
 
-Reading = ValuesMap[Literal["READING"], float]
+Reading = ValuesMap[Literal["READING"], One[float]]
 """
 > An instantaneous data point, as from a meter. Same as pulse count. Payload
 > value is a float and units are defined in payloadDescriptor.
 """
-Usage = ValuesMap[Literal["USAGE"], float]
+Usage = ValuesMap[Literal["USAGE"], One[float]]
 """
 > Energy usage over an interval. Payload value is a float and units are defined in
 > payloadDescriptor.
 """
 
-Demand = ValuesMap[Literal["DEMAND"], float]
+Demand = ValuesMap[Literal["DEMAND"], One[float]]
 """
 > Power usage for an interval, i.e. Real Power. Payload value is a float, units
 > defined in payloadDescriptor. Reading type indicates MEAN, PEAK,
 > FORECAST
 """
 
-Setpoint = ValuesMap[Literal["SETPOINT"], AnyValue]
+Setpoint = ValuesMap[Literal["SETPOINT"], Sequence[AnyValue]]
 """
 > Current control setpoint of a resource, see CONTROL_SETPOINT event
 > payloadType above. Payload values are determined by application.
 """
-DeltaUsage = ValuesMap[Literal["DELTA_USAGE"], float]
+DeltaUsage = ValuesMap[Literal["DELTA_USAGE"], One[float]]
 """
 > Change in usage as compared to a baseline. Payload value is a float and units
 > are defined in payloadDescriptor.
 """
 
-Baseline = ValuesMap[Literal["BASELINE"], AnyValue]
+Baseline = ValuesMap[Literal["BASELINE"], Sequence[AnyValue]]
 """
 > Indicates energy or power consumption in the absence of load control.
 > Payload value is determined by reading type which may indicate usage or
@@ -103,80 +103,80 @@ class OperatingState(StrEnum):
     """
 
 
-OperatingStateReport = ValuesMap[Literal["OPERATING_STATE"], OperatingState]
+OperatingStateReport = ValuesMap[Literal["OPERATING_STATE"], Sequence[OperatingState]]
 """
 > Payload values array includes a list of operating state enumerations, see
 > below
 """
-UpRegulationAvailable = ValuesMap[Literal["UP_REGULATION_AVAILABLE"], float]
+UpRegulationAvailable = ValuesMap[Literal["UP_REGULATION_AVAILABLE"], One[float]]
 """
 > Up Regulation capacity available for dispatch, in real power. Payload value is a
 > float, units defined in payloadDescriptor. Reading type indicates MEAN, PEAK,
 > FORECAST
 """
 
-DownRegulationAvailable = ValuesMap[Literal["DOWN_REGULATION_AVAILABLE"], float]
+DownRegulationAvailable = ValuesMap[Literal["DOWN_REGULATION_AVAILABLE"], One[float]]
 """
 > Down Regulation capacity available for dispatch, in real power. Payload value
 > is a float, units defined in payloadDescriptor. Reading type indicates MEAN,
 > PEAK, FORECAST.
 """
 
-RegulationSetpoint = ValuesMap[Literal["REGULATION_SETPOINT"], float]
+RegulationSetpoint = ValuesMap[Literal["REGULATION_SETPOINT"], One[float]]
 """
 > Regulation setpoint as instructed as part of regulation services. Payload value
 > is a float, units defined in payloadDescriptor. Reading type indicates MEAN,
 > PEAK, FORECAST.
 """
-StorageUsableCapacity = ValuesMap[Literal["STORAGE_USABLE_CAPACITY"], float]
+StorageUsableCapacity = ValuesMap[Literal["STORAGE_USABLE_CAPACITY"], One[float]]
 """
 > Usable energy that the storage device can hold when fully charged. Payload
 > value is a float, units of energy defined in payloadDescriptor.
 """
-StorageChargeLevel = ValuesMap[Literal["STORAGE_CHARGE_LEVEL"], float]
+StorageChargeLevel = ValuesMap[Literal["STORAGE_CHARGE_LEVEL"], One[float]]
 """
 > Current storage charge level expressed as a percentage, where 0% is empty
 > and 100% is full. Payload value is a float, units of PERCENT defined in
 > payloadDescriptor
 """
 
-StorageMaxDischargePower = ValuesMap[Literal["STORAGE_MAX_DISCHARGE_POWER"], float]
+StorageMaxDischargePower = ValuesMap[Literal["STORAGE_MAX_DISCHARGE_POWER"], One[float]]
 """
 > The maximum sustainable power that can be discharged into an electricity
 > network (injection). Payload value is a float, units of power defined in
 > payloadDescriptor.
 """
 
-StorageMaxChargePower = ValuesMap[Literal["STORAGE_MAX_CHARGE_POWER"], float]
+StorageMaxChargePower = ValuesMap[Literal["STORAGE_MAX_CHARGE_POWER"], One[float]]
 """
 > The maximum sustainable power that can be charged from an electricity
 > network (load). Payload value is a float, units of power defined in
 > payloadDescriptor.
 """
 
-SimpleLevel = ValuesMap[Literal["SIMPLE_LEVEL"], Literal[0, 1, 2, 3]]
+SimpleLevel = ValuesMap[Literal["SIMPLE_LEVEL"], One[Literal[0, 1, 2, 3]]]
 """
 > Simple level that a VEN resource is operating at for each Interval. Payload
 > value is an integer 0, 1, 2, 3 corresponding to values in SIMPLE events.
 """
 
-UsageForecast = ValuesMap[Literal["USAGE_FORECAST"], float]
+UsageForecast = ValuesMap[Literal["USAGE_FORECAST"], One[float]]
 """
 > Payload values array contains a single float indicating expected resource
 > usage for the associated interval. Units of energy defined in payloadDescriptor.
 """
 
-StorageDispatchForecast = ValuesMap[Literal["STORAGE_DISPATCH_FORECAST"], float]
+StorageDispatchForecast = ValuesMap[Literal["STORAGE_DISPATCH_FORECAST"], One[float]]
 """
 > Payload values array contains a single float indicating expected stored energy
 > that could be dispatched for the associated interval
 """
-LoadShedDeltaAvailable = ValuesMap[Literal["LOAD_SHED_DELTA_AVAILABLE"], float]
+LoadShedDeltaAvailable = ValuesMap[Literal["LOAD_SHED_DELTA_AVAILABLE"], One[float]]
 """
 > Payload values array contains a single float indicating expected increase or
 > decrease in load by a resource for the associated interval.
 """
-GenerationDeltaAvailable = ValuesMap[Literal["GENERATION_DELTA_AVAILABLE"], float]
+GenerationDeltaAvailable = ValuesMap[Literal["GENERATION_DELTA_AVAILABLE"], One[float]]
 """
 > Payload values array contains a single float indicating expected generation by
 > a resource for the associated interval
@@ -203,29 +203,35 @@ class DataQualityLevel(StrEnum):
     """
 
 
-DataQualityReport = ValuesMap[Literal["DATA_QUALITY"], DataQualityLevel]
+DataQualityReport = ValuesMap[Literal["DATA_QUALITY"], One[DataQualityLevel]]
 """
 > Payload values array contains a string indicating data quality of companion
 > report payload in the same interval. Strings may be one of enumerated Data
 > Quality enumerations
 """
 
-ImportReservationCapacity = ValuesMap[Literal["IMPORT_RESERVATION_CAPACITY"], float]
+ImportReservationCapacity = ValuesMap[
+    Literal["IMPORT_RESERVATION_CAPACITY"],
+    Sequence[float],  # <- Q: shouldn't this be nonempty?
+]
 """
 > Amount of additional import capacity requested. Payload values are a float.
 """
 
-ImportReservationFee = ValuesMap[Literal["IMPORT_RESERVATION_FEE"], float]
+ImportReservationFee = ValuesMap[Literal["IMPORT_RESERVATION_FEE"], One[float]]
 """
 > Amount per unit of import capacity that the VEN is willing to pay for the
 > requested reservation. Payload value is a float with currency defined in payloadDescriptor.
 """
+# Q: "a float": just one, right? 0, 2+ are invalid?
 
-ExportReservationCapacity = ValuesMap[Literal["EXPORT_RESERVATION_CAPACITY"], float]
+ExportReservationCapacity = ValuesMap[
+    Literal["EXPORT_RESERVATION_CAPACITY"], One[float]
+]
 """
 > Amount of additional export capacity requested. Payload values are a float
 """
-ExportReservationFee = ValuesMap[Literal["EXPORT_RESERVATION_FEE"], float]
+ExportReservationFee = ValuesMap[Literal["EXPORT_RESERVATION_FEE"], One[float]]
 """
 > Amount per unit of export capacity that the VEN is willing to pay for the
 > requested reservation. Payload value is a float with currency defined in

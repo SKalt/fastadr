@@ -2,7 +2,7 @@
 # Duration = Annotated[timedelta]
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Annotated, Literal, Optional, Union
 
 import annotated_types
@@ -95,7 +95,7 @@ class ReportResource(BaseModel):
     """A list of interval objects."""
 
 
-class ObjectTypes(StrEnum):
+class ObjectTypes(Enum):
     PROGRAM = "PROGRAM"
     EVENT = "EVENT"
     REPORT = "REPORT"
