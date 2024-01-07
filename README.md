@@ -1,6 +1,6 @@
 # `fastadr`
 
-Goal: implement the entire OpenAPI 3 spec.
+Goal: implement the entire OpenADR 3.0.0 spec.
 
 Status: work in progress.
 
