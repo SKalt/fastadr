@@ -3,7 +3,7 @@
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Annotated, Literal, Optional, Sequence, Union
+from typing import Annotated, Generic, Literal, Optional, Sequence, TypeVar, Union
 
 import annotated_types
 from pydantic import BaseModel, Field, StrictFloat, StringConstraints, Strict
@@ -85,6 +85,45 @@ class Problem(BaseModel):
     """
 
 
+class IntervalPeriod(BaseModel):
+    """
+    Defines temporal aspects of intervals.
+    A duration of default null indicates infinity.
+    A randomizeStart of default null indicates no randomization.
+    """
+
+    start: Optional[DateTime]
+    """The start time of an interval or set of intervals."""
+    duration: Optional[Duration] = None
+    """The duration of an interval or set of intervals."""
+    randomizeStart: Optional[Duration] = None
+    """a randomization time that may be applied to start."""
+
+
+Values = TypeVar("Values", bound=AnyValuesMap, contravariant=True)
+
+
+class Interval(BaseModel, Generic[Values]):
+    """
+    An object defining a temporal window and a list of valuesMaps.
+    if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
+    """
+
+    id: Int32
+    """
+    A client generated number assigned an interval object. Not a sequence number.
+    """
+
+    intervalPeriod: IntervalPeriod = Field(
+        default_factory=lambda: IntervalPeriod(start=None)
+    )
+    """Defines default start and durations of intervals."""
+    # TODO: clarify default value for omissible non-null intervalPeriod
+
+    payloads: Sequence[Values]
+    """A list of valuesMap objects."""
+
+
 class ReportResource(BaseModel):
     """Report data associated with a resource."""
 
@@ -92,8 +131,8 @@ class ReportResource(BaseModel):
     """
     User generated identifier. A value of AGGREGATED_REPORT indicates an aggregation of more that one resource's data
     """
-    intervalPeriod: Optional["IntervalPeriod"] = None
-    intervals: list["Interval"]
+    intervalPeriod: Optional[IntervalPeriod] = None
+    intervals: Sequence[Interval] # FIXME
     """A list of interval objects."""
 
 
@@ -154,43 +193,6 @@ class ReportDescriptor(BaseModel):
     1 indicates generate one report.
     -1 indicates repeat indefinitely.
     """
-
-
-class IntervalPeriod(BaseModel):
-    """
-    Defines temporal aspects of intervals.
-    A duration of default null indicates infinity.
-    A randomizeStart of default null indicates no randomization.
-    """
-
-    start: Optional[DateTime]
-    """The start time of an interval or set of intervals."""
-    duration: Optional[Duration] = None
-    """The duration of an interval or set of intervals."""
-    randomizeStart: Optional[Duration] = None
-    """a randomization time that may be applied to start."""
-
-
-# TODO: make generic over what kind of `valuesMaps` are allowed?
-class Interval(BaseModel):
-    """
-    An object defining a temporal window and a list of valuesMaps.
-    if intervalPeriod present may set temporal aspects of interval or override event.intervalPeriod.
-    """
-
-    id: Int32
-    """
-    A client generated number assigned an interval object. Not a sequence number.
-    """
-
-    intervalPeriod: IntervalPeriod = Field(
-        default_factory=lambda: IntervalPeriod(start=None)
-    )
-    """Defines default start and durations of intervals."""
-    # TODO: clarify default value for omissible non-null intervalPeriod
-
-    payloads: list[AnyValuesMap]  # TODO: narrow
-    """A list of valuesMap objects."""
 
 
 # TODO: make generic over what kind of `valuesMaps` are allowed?
@@ -338,7 +340,7 @@ class Event(BaseModel):
     Relative priority of event. A lower number is a higher priority.
     """
 
-    targets: Optional[list[EventValues]] = None  # Q: what's the inner kind?
+    targets: Sequence[Target] | None = None  # Q: what's the inner kind?
     """A list of valuesMap objects."""
 
     reportDescriptors: Optional[list[ReportDescriptor]] = None
@@ -350,7 +352,7 @@ class Event(BaseModel):
     intervalPeriod: Optional[IntervalPeriod] = None
     """Defines default start and durations of intervals."""
 
-    intervals: list[Interval]
+    intervals: list[Interval[EventValues]]
     """A list of interval objects."""
 
 

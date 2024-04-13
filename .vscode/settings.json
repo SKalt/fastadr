@@ -12,10 +12,13 @@
   "python.terminal.activateEnvironment": false,
   "cSpell.words": [
     "datetime",
+    "fastapi",
     "oadr",
     "openapi",
     "pydantic",
+    "Setpoint",
     "timedelta",
+    "uvicorn",
     "vens"
   ],
   "python.analysis.importFormat": "relative"

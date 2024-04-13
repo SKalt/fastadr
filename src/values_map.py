@@ -15,9 +15,9 @@ class Point(BaseModel):  # <-- only ever found inside ValuesMap
     """A value on a y axis."""
 
 
-Type = TypeVar("Type", bound=str)
+Type = TypeVar("Type", bound=str, covariant=True)
 AnyValue = int | float | str | bool | Point
-Values = TypeVar("Values", bound=Sequence[AnyValue])
+Values = TypeVar("Values", bound=Sequence[AnyValue], covariant=True)
 Value = TypeVar("Value", bound=AnyValue)
 MaybeOne = Annotated[Sequence[Value], annotated_types.Len(min_length=0, max_length=1)]
 One = Annotated[Sequence[Value], annotated_types.Len(min_length=1, max_length=1)]
