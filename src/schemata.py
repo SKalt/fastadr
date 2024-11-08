@@ -3,15 +3,22 @@
 # """duration in ISO 8601 format""" # e.g. PT1H
 from datetime import datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Annotated, Generic, Literal, Optional, Sequence, TypeVar, Union
+from typing import Annotated, Any, Generic, Literal, Optional, Sequence, TypeVar, Union
 
 import annotated_types
-from pydantic import BaseModel, Field, StrictFloat, StringConstraints, Strict
+from pydantic import (
+    BaseModel,
+    Field,
+    PositiveInt,
+    StrictFloat,
+    StringConstraints,
+    Strict,
+)
 from pydantic_core import Url
 from .values_map import AnyValuesMap
 from .event_types import EventValues
 from .report_types import ReportValues
-from .resource_types import Attribute
+from .resource_types import Attribute  # FIXME: circular import
 from .target_types import Target
 
 
@@ -31,6 +38,7 @@ class OAuthScopes(StrEnum):
     """VENS and BL can write to vens and resources"""
 
 
+ShortStr = Annotated[str, StringConstraints(min_length=1, max_length=128), Strict()]
 Duration = Annotated[timedelta, str, Strict()]
 """duration in ISO 8601 format"""
 
@@ -127,12 +135,12 @@ class Interval(BaseModel, Generic[Values]):
 class ReportResource(BaseModel):
     """Report data associated with a resource."""
 
-    resourceName: Optional[str] = None
+    resourceName: Optional[ShortStr] = None
     """
     User generated identifier. A value of AGGREGATED_REPORT indicates an aggregation of more that one resource's data
     """
     intervalPeriod: Optional[IntervalPeriod] = None
-    intervals: Sequence[Interval] # FIXME
+    intervals: Sequence[Interval[Any]]  # FIXME: what kind of values are allowed here?
     """A list of interval objects."""
 
 
@@ -143,7 +151,7 @@ class ObjectTypes(Enum):
     SUBSCRIPTION = "SUBSCRIPTION"
     VEN = "VEN"
     RESOURCE = "RESOURCE"
-    # EVENT_PAYLOAD_DESCRIPTOR = "EVENT_PAYLOAD_DESCRIPTOR"
+    EVENT_PAYLOAD_DESCRIPTOR = "EVENT_PAYLOAD_DESCRIPTOR"
 
 
 class ReportDescriptor(BaseModel):
@@ -152,7 +160,7 @@ class ReportDescriptor(BaseModel):
     See OpenADR REST User Guide for detailed description of how configure a report request.
     """
 
-    payloadType: str
+    payloadType: ShortStr
     """
     Enumerated or private string signifying the nature of values.
     """
@@ -204,9 +212,9 @@ class Resource(BaseModel):
     id: ObjectID = ""  # FIXME: sensible default
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["RESOURCE"] = ObjectTypes.RESOURCE.value
+    objectType: Literal["RESOURCE"]
     """Used as discriminator, e.g. notification.object"""
-    resourceName: Optional[str] = None
+    resourceName: Optional[ShortStr] = None
     """
     User generated identifier, resource may be configured with identifier out-of-band.
     """
@@ -279,8 +287,8 @@ class Subscription(BaseModel):
     id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["SUBSCRIPTION"] = ObjectTypes.SUBSCRIPTION.value
-    clientName: Optional[str] = None
+    objectType: Literal["SUBSCRIPTION"]
+    clientName: Optional[ShortStr] = None
     programID: Optional[ObjectID] = None
     objectOperations: Sequence[ObjectOperationSub]
     """list of objects and operations to subscribe to."""
@@ -294,10 +302,10 @@ class Report(BaseModel):
     id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["REPORT"] = ObjectTypes.REPORT.value
+    objectType: Literal["REPORT"]
     programID: ObjectID
     eventID: ObjectID
-    clientName: Optional[str] = None
+    clientName: Optional[ShortStr] = None
     """
     User generated identifier; may be VEN ID provisioned during program enrollment.
     """
@@ -326,7 +334,7 @@ class Event(BaseModel):
     modificationDateTime: Optional[DateTime] = None
     "VTN-provisioned on object modification."
 
-    objectType: Literal["EVENT"] = ObjectTypes.EVENT.value
+    objectType: Literal["EVENT"]
     "Used as discriminator, e.g. notification.object"
 
     programID: ObjectID
@@ -335,7 +343,7 @@ class Event(BaseModel):
     eventName: Optional[str] = None
     """User defined string for use in debugging or User Interface."""
 
-    priority: Optional[int] = None
+    priority: Optional[PositiveInt] = None
     """
     Relative priority of event. A lower number is a higher priority.
     """
@@ -373,13 +381,13 @@ class EventPayloadDescriptor(BaseModel):
     associated descriptor provides necessary context such as units and currency.
     """
 
-    objectType: str = "EVENT_PAYLOAD_DESCRIPTOR"
+    objectType: Literal["EVENT_PAYLOAD_DESCRIPTOR"]
     """Used as discriminator, e.g. program.payloadDescriptors"""
-    payloadType: str
+    payloadType: ShortStr
     """Enumerated or private string signifying the nature of values."""
-    units: str = "KWH"
+    units: Optional[str] = None
     """Units of measure."""
-    currency: str = "USD"
+    currency: Optional[str] = None
     """Currency of price payload."""
 
 
@@ -391,23 +399,23 @@ class ReportPayloadDescriptor(BaseModel):
     associated descriptor provides necessary context such as units and data quality.
     """
 
-    objectType: str = "REPORT_PAYLOAD_DESCRIPTOR"
+    objectType: Literal["REPORT_PAYLOAD_DESCRIPTOR"]
     """Used as discriminator, e.g. program.payloadDescriptors"""
 
-    payloadType: str
+    payloadType: ShortStr
     """Enumerated or private string signifying the nature of values."""
 
-    units: str = "KWH"
+    units: Optional[str] = None
     """Units of measure."""
 
-    readingType: str = "DIRECT_READ"
+    readingType: Optional[str] = None
     """Enumerated or private string signifying the type of reading."""
 
-    accuracy: StrictFloat = 0.0
+    accuracy: Optional[StrictFloat] = None
     """A quantification of the accuracy of a set of payload values."""
     # FIXME: ^`"format": "float"` missing from generated json schema
 
-    confidence: Percent = 100
+    confidence: Optional[Percent] = None
     """A quantification of the confidence in a set of payload values."""
 
 
@@ -441,7 +449,7 @@ class Program(BaseModel):
     retailerLongName: Optional[str] = None
     "Long name of energy retailer for human readability."
 
-    programType: Optional[str] = None
+    programType: Optional[ShortStr] = None
     "A program defined categorization."
 
     country: Optional[str] = None
@@ -481,7 +489,7 @@ class VEN(BaseModel):
     creationDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
     objectType: Literal["VEN"] = ObjectTypes.VEN.value
-    venName: Optional[str] = None
+    venName: Optional[ShortStr] = None
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.
     """

@@ -2,6 +2,7 @@ from typing import Annotated, Generic, Sequence, TypeVar
 import annotated_types
 
 from pydantic import BaseModel
+from .schemata import ShortStr
 
 
 class Point(BaseModel):  # <-- only ever found inside ValuesMap
@@ -15,7 +16,7 @@ class Point(BaseModel):  # <-- only ever found inside ValuesMap
     """A value on a y axis."""
 
 
-Type = TypeVar("Type", bound=str, covariant=True)
+Type = TypeVar("Type", bound=ShortStr, covariant=True)
 AnyValue = int | float | str | bool | Point
 Values = TypeVar("Values", bound=Sequence[AnyValue], covariant=True)
 Value = TypeVar("Value", bound=AnyValue)
@@ -38,6 +39,7 @@ class ValuesMap(BaseModel, Generic[Type, Values]):
     Enumerated or private string signifying the nature of values.
     E.G. "PRICE" indicates value is to be interpreted as a currency.
     """
+
     values: Values
     """
     The value associated with the type.

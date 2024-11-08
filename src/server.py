@@ -111,12 +111,12 @@ AccessToken = dict[str, list[str]]  # FIXME: define realistic JWT type
 
 
 def check_auth(
-    scopes: list[str]
+    scopes: list[str],
 ) -> Callable[
     [Callable[Params, Result]], Callable[Concatenate[AccessToken, Params], Result]
 ]:
     def decorator(
-        fn: Callable[Params, Result]
+        fn: Callable[Params, Result],
     ) -> Callable[Concatenate[AccessToken, Params], Result]:
         def ident(
             access_token: AccessToken, /, *args: Params.args, **kwargs: Params.kwargs
@@ -231,7 +231,6 @@ def search_program_by_program_id(programID: ObjectID) -> Program:
 
     :param programID: ID of the program to retrieve.
     """
-    # TODO: actually retrieve program
     if (program := DB.get_program(programID)) is not None:
         return program
     else:
@@ -260,12 +259,13 @@ def delete_program(programID: ObjectID) -> Program:
     if (program := DB.delete_program(programID)) is not None:
         return program
     else:
-        raise ProgramNotFound(program_id=programID, status=400)
+        raise ProgramNotFound(program_id=programID, status=404)
 
 
 def search_all_reports(
     programID: ObjectID = "",
     clientName: str = "",
+    eventID: ObjectID = "",
     skip: PositiveInt32 = 0,
     limit: PositiveInt32 = 50,
 ) -> list[Report]:
@@ -276,6 +276,7 @@ def search_all_reports(
 
 
     """
+    # TODO: filter on eventID, too
     results: list[Report] = []
     for report in DB.reports.values():
         if programID and report.programID == programID:
@@ -307,6 +308,7 @@ def create_report(report: Report) -> Report:
     if not report.id:
         # make one?
         report.id = str(len(DB.reports) + 1)
+        # FIXME: this logic belongs in the database interface
     DB.reports[report.id] = report
     return report
 
@@ -318,7 +320,7 @@ def search_reports_by_report_id(reportID: ObjectID) -> Report:
     if (report := DB.reports.get(reportID)) is not None:
         return report
     else:
-        raise ReportNotFound(reportID, status=400)
+        raise ReportNotFound(reportID, status=404)
 
 
 def update_report(report: Report, reportID: ObjectID) -> Report:
@@ -345,15 +347,15 @@ def delete_report(reportID: ObjectID) -> Report:
     if (report := DB.reports.pop(reportID, None)) is not None:
         return report
     else:
-        raise ReportNotFound(reportID, status=400)
+        raise ReportNotFound(reportID, status=404)
 
 
 def search_all_events(
-    programID: ObjectID,
-    targetType: str,
-    targetValues: list[str],
-    skip: PositiveInt32,
-    limit: LimitTo50,
+    programID: Optional[ObjectID] = None,
+    targetType: Optional[str] = None,
+    targetValues: Optional[list[str]] = None,
+    skip: PositiveInt32 = 0,
+    limit: LimitTo50 = 50,
 ) -> list[Event]:
     """
     List all events known to the server. May filter results by programID query param.
@@ -384,7 +386,7 @@ def search_events_by_id(eventID: ObjectID) -> Event:
     if (event := DB.events.get(eventID)) is not None:
         return event
     else:
-        raise EventNotFound(eventID, status=400)
+        raise EventNotFound(eventID, status=404)
 
 
 def update_event(eventID: ObjectID, event: Event) -> Event:
@@ -398,7 +400,7 @@ def delete_event(eventID: ObjectID) -> Event:
     if (event := DB.events.pop(eventID, None)) is not None:
         return event
     else:
-        raise EventNotFound(eventID, status=400)
+        raise EventNotFound(eventID, status=404)
 
 
 def register_program_paths():
@@ -567,23 +569,23 @@ def search_subscription_by_id(subscriptionID: ObjectID) -> Subscription:
     if (sub := DB.subscriptions.get(subscriptionID)) is not None:
         return sub
     else:
-        raise SubscriptionNotFound(subscriptionID, status=400)
+        raise SubscriptionNotFound(subscriptionID, status=404)
 
 
 def update_subscription(subscriptionID: ObjectID, subscription: Subscription) -> None:
     """
     Update the subscription specified by subscriptionID specified in path.
     """
-    DB.subscriptions[
-        subscriptionID
-    ] = subscription  # FIXME: handle conflicts, id generation, etc
+    DB.subscriptions[subscriptionID] = (
+        subscription  # FIXME: handle conflicts, id generation, etc
+    )
 
 
 def delete_subscription(subscriptionID: ObjectID) -> Subscription:
     if (sub := DB.subscriptions.pop(subscriptionID, None)) is not None:
         return sub
     else:
-        raise SubscriptionNotFound(subscriptionID, status=400)
+        raise SubscriptionNotFound(subscriptionID, status=404)
 
 
 def register_subscription_paths():
@@ -624,10 +626,11 @@ def register_subscription_paths():
 
 
 def search_vens(
-    targetType: str,
-    targetValues: list[str],
     skip: PositiveInt32,
-    limit: LimitTo50,
+    targetType: Optional[str],
+    venName: Optional[str],
+    targetValues: Optional[list[str]],
+    limit: Optional[LimitTo50] = None,
 ) -> list[VEN]:
     """
     List all vens.
@@ -636,6 +639,7 @@ def search_vens(
     """
     results: list[VEN] = []
     # TODO: implement filtering
+    # DB.vens.values()
     return results
 
 
@@ -656,7 +660,7 @@ def search_ven_by_id(venID: ObjectID) -> VEN:
     if (ven := DB.vens.get(venID)) is not None:
         return ven
     else:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
 
 
 def update_ven(venID: ObjectID, ven: VEN) -> VEN:
@@ -680,15 +684,16 @@ def delete_ven(venID: ObjectID) -> VEN:
         DB.resources.pop(venID, None)  # delete all associated resources
         return ven
     else:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
 
 
 def search_ven_resources(
     venID: ObjectID,
-    targetType: str,
-    targetValues: list[str],
-    skip: PositiveInt32,
-    limit: LimitTo50,
+    resourceName: Optional[str],
+    targetType: Optional[str],
+    targetValues: Optional[list[str]],
+    skip: Optional[PositiveInt32],
+    limit: LimitTo50,  # FIXME: what's `style: form` in FastAPI?
 ) -> list[Resource]:
     """
     Return the ven resources specified by venID specified in path.
@@ -696,14 +701,14 @@ def search_ven_resources(
     if (resources := DB.resources.get(venID)) is not None:
         return [*resources.values()]  # TODO: actually filter resources
     else:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
     ...  # TODO: implement
 
 
 def create_resource(venID: ObjectID, resource: Resource) -> Resource:
     """Create a new resource"""
     if (resources := DB.resources.get(venID)) is None:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
     if not resource.id:
         # make one? # FIXME: make unique
         resource.id = str(len(DB.resources[venID]) + 1)
@@ -717,11 +722,11 @@ def search_ven_resource_by_id(venID: ObjectID, resourceID: ObjectID) -> Resource
     Return the ven resource specified by venID and resourceID specified in path.
     """
     if (resources := DB.resources.get(venID)) is None:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
     if (resource := resources.get(resourceID)) is not None:
         return resource
     else:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
 
 
 def delete_ven_resource(venID: ObjectID, resourceID: ObjectID) -> Resource:
@@ -729,11 +734,11 @@ def delete_ven_resource(venID: ObjectID, resourceID: ObjectID) -> Resource:
     Delete the ven resource specified by venID and resourceID specified in path.
     """
     if (resources := DB.resources.get(venID)) is None:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
     if (resource := resources.pop(resourceID, None)) is not None:
         return resource
     else:
-        raise VenNotFound(venID, status=400)
+        raise VenNotFound(venID, status=404)
 
 
 def register_ven_paths():
@@ -810,7 +815,7 @@ def register_paths():
     register_report_paths()
     register_event_paths()
     register_ven_paths()
-    api.get("/auth/token", operation_id="fetchToken", summary="fetch an access token")(
+    api.post("/auth/token", operation_id="fetchToken", summary="fetch an access token")(
         fetch_token
     )
     # /auth/token:
