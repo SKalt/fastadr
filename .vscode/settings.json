@@ -21,5 +21,8 @@
     "uvicorn",
     "vens"
   ],
-  "python.analysis.importFormat": "relative"
+  "python.analysis.importFormat": "relative",
+  "[yaml]": {
+    "editor.formatOnSave": false
+  }
 }
