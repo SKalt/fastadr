@@ -1,2 +1,2 @@
-# #yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/notification
+# #yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/notification
 { "objectType": "VEN", "operation": "GET", "object": {} } # `object` is missing the required discriminator field, `"objectType": "VEN"`

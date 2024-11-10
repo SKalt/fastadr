@@ -19,6 +19,7 @@ from .errors import (
     ProgramNotFound,
     ReportNotFound,
     SubscriptionNotFound,
+    VenNotFound,
 )
 from .types.schemata import (
     VEN,

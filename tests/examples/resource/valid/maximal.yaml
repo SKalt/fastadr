@@ -1,11 +1,12 @@
-# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/resource
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/resource
 {
   "id": "resource-123", # omissible identifier
   "createdDateTime": "3000-01-01T00:00:00Z",
   "modificationDateTime": "1970-01-01T00:00:00Z",
   "objectType": "RESOURCE",
-  "resourceName": "Call me Ishmael. Some years ago—never mind how long precisely— ... that in her retracing search after her missing children, only found another orphan.",
-  # ^ required, unrestricted
+  "resourceName": "⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡",
+  # ^ Restricted to 128 characters :)
+  # However, none of the characters have to be ascii: the byte length can be up to 4x128
   venID: "ven-123", # omissible identifier
   attributes: [
   # omissible, non-nullable

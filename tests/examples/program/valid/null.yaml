@@ -1,19 +1,9 @@
-# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/program
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/program
 {
   "id": "id-123",
-  "programName": "", # can be empty
-  "createdDateTime": null,
-  "modificationDateTime": null,
-  "retailerName": null,
-  "retailerLongName": null,
-  "country": null,
-  "principalSubdivision": null,
-  "programType": null,
-  "timeZoneOffset": null,
-  "intervalPeriod": { "start": null, "duration": null, "randomizeStart": null },
-  "programDescriptions": null,
-  # "bindingEvents": omitted boolean
-  # "localPrice": omitted boolean
-  "payloadDescriptors": null, # nullable
-  "targets": null,
+  "programName": " ",
+  "intervalPeriod": { start: "0001-01-01T00:00:00Z" },
+  "programDescriptions": [],
+  "payloadDescriptors": [],
+  "targets": [],
 }

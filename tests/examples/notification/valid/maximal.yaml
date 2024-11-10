@@ -1,7 +1,7 @@
-# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/notification
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/notification
 {
   "objectType": "VEN", # required, enumerated
   "operation": "GET", # required, enumerated
   "targets": [{ type: "...", values: ["..."] }], # omissible, nullable
-  "object": { "objectType": "PROGRAM", "programName": "" }, # required, non-nullable discriminated union
+  "object": { "objectType": "PROGRAM", "programName": " " }, # required, non-nullable discriminated union
 }
