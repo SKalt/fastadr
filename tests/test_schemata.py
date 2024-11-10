@@ -5,8 +5,8 @@ from pydantic import TypeAdapter, ValidationError
 from pydantic_core import Url
 import pytest
 from typing import Any, Protocol
-from src.values_map import Point, AnyValuesMap
-from src.schemata import (
+from src.types.values_map import Point, AnyValuesMap
+from src.types.schemata import (
     Duration,
     DateTime,
     ObjectID,
@@ -41,8 +41,7 @@ def get_json(file: Path) -> str:
 
 
 class Validator(Protocol):
-    def model_validate_json(self, json_data: str | bytes) -> Any:
-        ...
+    def model_validate_json(self, json_data: str | bytes) -> Any: ...
 
 
 def _check_valid_document(model: Validator, file: Path):
