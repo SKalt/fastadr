@@ -1,0 +1,10 @@
+name: fastadr-auth
+description: auth setup for example OpenADR 3.x.x stack
+runtime:
+  name: python
+  options:
+    toolchain: poetry
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: python

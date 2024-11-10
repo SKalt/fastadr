@@ -11,10 +11,12 @@
   "bashIde.shellcheckArguments": "--source-path=SCRIPTDIR  --external-sources",
   "python.terminal.activateEnvironment": false,
   "cSpell.words": [
+    "authentik",
     "datetime",
     "fastapi",
     "oadr",
     "openapi",
+    "pulumi",
     "pydantic",
     "Setpoint",
     "timedelta",

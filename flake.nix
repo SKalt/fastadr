@@ -45,8 +45,11 @@
               lychee
               shellcheck
             ] ++ (with pkgs.python311Packages; [ pip ]);
-
+          nativeBuildInputs = with pkgs; [
+            stdenv.cc.cc.lib
+          ];
           # Environment variables
+          LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
         };
       }
     );
