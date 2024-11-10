@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/reportPayloadDescriptor
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/reportPayloadDescriptor
 {
   "objectType": "REPORT_PAYLOAD_DESCRIPTOR",
   "payloadType": "USAGE",

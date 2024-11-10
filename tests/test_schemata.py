@@ -49,6 +49,8 @@ def _check_valid_document(model: Validator, file: Path):
         model.model_validate_json(get_json(file))
     except ValidationError as e:
         e.add_note(f"file: {file.relative_to(REPO_ROOT)}")
+        for err in e.errors():
+            print(err)
         raise e
 
 
@@ -216,9 +218,9 @@ def test_invalid_ven(f: Path):
 
 def test_weird_ven():
     # weird-yet-valid cases:
-    VEN(objectType="VEN")  # all defaults -- many of which are surprisingly null/None
-    VEN(venName=None, objectType="VEN")  # - venName is required, but can be null/None
-    VEN(venName="", objectType="VEN")  # - venName is required, but can be empty string
+    VEN(venName="required")
+    # ^ all defaults -- many of which are surprisingly null/None
+    VEN(venName="required", objectType="VEN")
 
 
 @pytest.mark.parametrize("f", _get_valid_examples(FIXTURES_DIR / "program"))

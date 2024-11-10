@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=../../../../spec/1_oadr3.0.0.yaml#/components/schemas/reportDescriptor
+# yaml-language-server: $schema=../../../../spec/1_oadr3.0.1.yaml#/components/schemas/reportDescriptor
 {
-  "payloadType": "", # required, unrestricted
+  "payloadType": " ", # required, unrestricted
   "readingType": "DIRECT_READ", # omissible, unrestricted
   "targets": [], # omissible, nullable
   "aggregate": false, # omissible

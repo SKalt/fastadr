@@ -8,6 +8,7 @@ from pydantic import (
     BaseModel,
     Field,
     PositiveInt,
+    NonNegativeInt,
     StrictFloat,
 )
 from pydantic_core import Url
@@ -134,6 +135,7 @@ class ObjectTypes(Enum):
     PROGRAM = "PROGRAM"
     EVENT = "EVENT"
     REPORT = "REPORT"
+    REPORT_PAYLOAD_DESCRIPTOR = "REPORT_PAYLOAD_DESCRIPTOR"
     SUBSCRIPTION = "SUBSCRIPTION"
     VEN = "VEN"
     RESOURCE = "RESOURCE"
@@ -195,15 +197,17 @@ class Resource(BaseModel):
     A resource is an energy device or system subject to control by a VEN.
     """
 
-    id: ObjectID = ""  # FIXME: sensible default
-    createdDateTime: Optional[DateTime] = None
-    modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["RESOURCE"]
-    """Used as discriminator, e.g. notification.object"""
-    resourceName: Optional[ShortStr] = None
+    resourceName: ShortStr  # required
     """
     User generated identifier, resource may be configured with identifier out-of-band.
     """
+
+    id: ObjectID = ""  # FIXME: sensible default
+    createdDateTime: Optional[DateTime] = None
+    modificationDateTime: Optional[DateTime] = None
+    objectType: Literal["RESOURCE"] = ObjectTypes.RESOURCE.value
+    """Used as discriminator, e.g. notification.object"""
+
     venID: ObjectID = ""  # FIXME: sensible default
     attributes: Sequence[Attribute] = Field(default_factory=lambda: [])
     """A list of valuesMap objects describing attributes."""
@@ -273,7 +277,7 @@ class Subscription(BaseModel):
     id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["SUBSCRIPTION"]
+    objectType: Literal["SUBSCRIPTION"] = ObjectTypes.SUBSCRIPTION.value
     clientName: Optional[ShortStr] = None
     programID: Optional[ObjectID] = None
     objectOperations: Sequence[ObjectOperationSub]
@@ -288,7 +292,7 @@ class Report(BaseModel):
     id: ObjectID = ""  # FIXME: what's a reasonable default for a field that isn't required, must be 1-128 chars long, and cannot be none?
     createdDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["REPORT"]
+    objectType: Literal["REPORT"] = ObjectTypes.REPORT.value
     programID: ObjectID
     eventID: ObjectID
     clientName: Optional[ShortStr] = None
@@ -320,7 +324,7 @@ class Event(BaseModel):
     modificationDateTime: Optional[DateTime] = None
     "VTN-provisioned on object modification."
 
-    objectType: Literal["EVENT"]
+    objectType: Literal["EVENT"] = ObjectTypes.EVENT.value
     "Used as discriminator, e.g. notification.object"
 
     programID: ObjectID
@@ -329,7 +333,7 @@ class Event(BaseModel):
     eventName: Optional[str] = None
     """User defined string for use in debugging or User Interface."""
 
-    priority: Optional[PositiveInt] = None
+    priority: Optional[NonNegativeInt] = None
     """
     Relative priority of event. A lower number is a higher priority.
     """
@@ -367,7 +371,9 @@ class EventPayloadDescriptor(BaseModel):
     associated descriptor provides necessary context such as units and currency.
     """
 
-    objectType: Literal["EVENT_PAYLOAD_DESCRIPTOR"]
+    objectType: Literal["EVENT_PAYLOAD_DESCRIPTOR"] = (
+        ObjectTypes.EVENT_PAYLOAD_DESCRIPTOR.value
+    )
     """Used as discriminator, e.g. program.payloadDescriptors"""
     payloadType: ShortStr
     """Enumerated or private string signifying the nature of values."""
@@ -385,7 +391,9 @@ class ReportPayloadDescriptor(BaseModel):
     associated descriptor provides necessary context such as units and data quality.
     """
 
-    objectType: Literal["REPORT_PAYLOAD_DESCRIPTOR"]
+    objectType: Literal["REPORT_PAYLOAD_DESCRIPTOR"] = (
+        ObjectTypes.REPORT_PAYLOAD_DESCRIPTOR.value
+    )
     """Used as discriminator, e.g. program.payloadDescriptors"""
 
     payloadType: ShortStr
@@ -435,7 +443,7 @@ class Program(BaseModel):
     retailerLongName: Optional[str] = None
     "Long name of energy retailer for human readability."
 
-    programType: Optional[ShortStr] = None
+    programType: Optional[str] = None
     "A program defined categorization."
 
     country: Optional[str] = None
@@ -470,12 +478,13 @@ class Program(BaseModel):
 class VEN(BaseModel):
     """VEN represents a client with the ven role."""
 
+    venName: ShortStr  # required!
+
     id: ObjectID = ""  # FIXME: reasonable default.
     # ^ if the `id`` key is present, then the value must be present
     creationDateTime: Optional[DateTime] = None
     modificationDateTime: Optional[DateTime] = None
-    objectType: Literal["VEN"] = ObjectTypes.VEN.value
-    venName: Optional[ShortStr] = None
+    objectType: Literal["VEN"] = ObjectTypes.VEN.value  # not required?
     """
     User generated identifier, may be VEN identifier provisioned during program enrollment.
     """

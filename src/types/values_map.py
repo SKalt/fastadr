@@ -2,7 +2,7 @@ from typing import Annotated, Generic, Sequence, TypeVar
 import annotated_types
 
 from pydantic import BaseModel
-from .schemata import ShortStr
+from .scalar import ShortStr
 
 
 class Point(BaseModel):  # <-- only ever found inside ValuesMap
