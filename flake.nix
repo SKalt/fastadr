@@ -44,6 +44,7 @@
               gitleaks
               lychee
               shellcheck
+              jq
             ] ++ (with pkgs.python311Packages; [ pip ]);
 
           # Environment variables
