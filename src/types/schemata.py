@@ -1,25 +1,30 @@
 # from datetime import timedelta
 # Duration = Annotated[timedelta]
 # """duration in ISO 8601 format""" # e.g. PT1H
-from datetime import datetime, timedelta
 from enum import Enum, StrEnum
-from typing import Annotated, Any, Generic, Literal, Optional, Sequence, TypeVar, Union
+from typing import Any, Generic, Literal, Optional, Sequence, TypeVar, Union
 
-import annotated_types
 from pydantic import (
     BaseModel,
     Field,
     PositiveInt,
     StrictFloat,
-    StringConstraints,
-    Strict,
 )
 from pydantic_core import Url
+from .scalar import (
+    DateTime,
+    Duration,
+    HTTPStatusCode,
+    Int32,
+    ObjectID,
+    ShortStr,
+    Percent,
+)
 from .values_map import AnyValuesMap
-from .event_types import EventValues
-from .report_types import ReportValues
-from .resource_types import Attribute  # FIXME: circular import
-from .target_types import Target
+from .event import EventValues
+from .report import ReportValues
+from .resource import Attribute  # FIXME: circular import
+from .target import Target
 
 
 class OAuthScopes(StrEnum):
@@ -36,25 +41,6 @@ class OAuthScopes(StrEnum):
     """VENs and BL can write to subscriptions"""
     write_vens = "write_vens"
     """VENS and BL can write to vens and resources"""
-
-
-ShortStr = Annotated[str, StringConstraints(min_length=1, max_length=128), Strict()]
-Duration = Annotated[timedelta, str, Strict()]
-"""duration in ISO 8601 format"""
-
-DateTime = Annotated[datetime, str, Strict()]
-"""datetime in ISO 8601 format"""
-
-HTTPStatusCode = Annotated[int, annotated_types.Ge(100), annotated_types.Lt(600)]
-
-ObjectID = Annotated[
-    str, StringConstraints(pattern="^[a-zA-Z0-9_-]*$", min_length=1, max_length=128)
-]
-"""URL safe VTN assigned object ID."""
-
-Percent = Annotated[int, annotated_types.Ge(0), annotated_types.Le(100), Strict()]
-
-Int32 = Annotated[int, annotated_types.Ge(-2147483648), annotated_types.Le(2147483647)]
 
 
 class Problem(BaseModel):
