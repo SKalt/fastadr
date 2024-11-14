@@ -27,8 +27,9 @@ services:
         target: /etc/config/hydra
     environment:
       - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
-      - STRATEGIES_ACCESS_TOKEN=jwt
       - OIDC_SUBJECT_IDENTIFIERS_SUPPORTED_TYPES=public
+      - STRATEGIES_ACCESS_TOKEN=jwt
+      - ORY_SDK_URL=http://127.0.0.1:4445/
     restart: unless-stopped
     depends_on:
       - hydra-migrate
@@ -38,7 +39,7 @@ services:
     image: docker.io/oryd/hydra:v2.2.0
     environment:
       - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
-    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    command: migrate -c /etc/config/hydra/hydra.yaml sql -e --yes
     volumes:
       - type: volume
         source: hydra-sqlite
