@@ -7,7 +7,6 @@ from typing import Any, Generic, Literal, Optional, Sequence, TypeVar, Union
 from pydantic import (
     BaseModel,
     Field,
-    PositiveInt,
     NonNegativeInt,
     StrictFloat,
 )
@@ -28,8 +27,8 @@ from .resource import Attribute  # FIXME: circular import
 from .target import Target
 
 
-class OAuthScopes(StrEnum):
-    # See page 10, section 7, "EndPoints" in file://./../spec/2_OpenADR%203.0%20Definition%20v3.0.0.pdf
+class OAuthScopes(StrEnum):  # FIXME: move to security.py
+    # See page 10, section 7, "EndPoints" in file://./../../spec/2_OpenADR%203.0%20Definition%20v3.0.1.pdf
     read_all = "read_all"
     """VENs and BL can read all resources"""
     write_programs = "write_programs"
@@ -315,7 +314,7 @@ class Event(BaseModel):
     If intervalPeriod is present, sets start time and duration of intervals.
     """
 
-    id: ObjectID = ""
+    id: Optional[ObjectID] = None
     "VTN provisioned ID of this object instance."
 
     createdDateTime: Optional[DateTime] = None

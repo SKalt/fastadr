@@ -1,11 +1,10 @@
 import annotated_types
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from typing import (
     Annotated,
     Any,
     Callable,
     ParamSpec,
-    Concatenate,
     NamedTuple,
     Optional,
     TypeVar,
@@ -21,6 +20,7 @@ from .errors import (
     SubscriptionNotFound,
     VenNotFound,
 )
+from .security import get_bearer_id
 from .types.schemata import (
     VEN,
     Event,
@@ -33,6 +33,7 @@ from .types.schemata import (
     Resource,
     Subscription,
 )
+
 
 api = APIRouter()
 
@@ -47,27 +48,6 @@ Params = ParamSpec("Params")
 Result = TypeVar("Result")
 Fn = TypeVar("Fn", bound=Callable[..., Any])
 AccessToken = dict[str, list[str]]  # FIXME: define realistic JWT type
-
-
-def check_auth(
-    scopes: list[str],
-) -> Callable[
-    [Callable[Params, Result]], Callable[Concatenate[AccessToken, Params], Result]
-]:
-    def decorator(
-        fn: Callable[Params, Result],
-    ) -> Callable[Concatenate[AccessToken, Params], Result]:
-        def ident(
-            access_token: AccessToken, /, *args: Params.args, **kwargs: Params.kwargs
-        ) -> Any:
-            # FIXME: actually check scopes
-            # See also: https://fastapi.tiangolo.com/advanced/security/oauth2-scopes/
-            # TODO: use fastapi.Depends to do this automatically
-            return fn(*args, **kwargs)
-
-        return ident
-
-    return decorator
 
 
 # TODO: yield JSONResponses whenever a ValidationError or OpenADR3Exception is raised
@@ -126,13 +106,14 @@ DB = Backend(
 
 
 def search_all_programs(
-    targetType: str = "",
-    targetValues: Optional[list[str]] = None,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+    targetType: str = "",  # TODO: docs
+    targetValues: Optional[list[str]] = None,  # TODO: docs
     skip: PositiveInt32 = 0,
     limit: LimitTo50 = 50,  # TODO: sensible default value?
     # TODO: implement OAuth2 authentication
     # authorization: Optional[Auth] = None,
-) -> list[Program]:
+) -> list[Program]:  # FIXME: clean up description for OpenAPI presentation
     """
     List all programs known to the server.
     Use skip and pagination query params to limit response size.
@@ -154,7 +135,10 @@ def search_all_programs(
     )
 
 
-def create_program(program: Program) -> Program:
+def create_program(
+    program: Program,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_programs"])],
+) -> Program:
     """
     Create a new program in the server.
     """
@@ -164,7 +148,10 @@ def create_program(program: Program) -> Program:
     return program
 
 
-def search_program_by_program_id(programID: ObjectID) -> Program:
+def search_program_by_program_id(
+    programID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+) -> Program:
     """
     Get a specific program by ID.
 
@@ -176,7 +163,11 @@ def search_program_by_program_id(programID: ObjectID) -> Program:
         raise ProgramNotFound(programID)
 
 
-def update_program(program: Program, programID: ObjectID) -> Program:
+def update_program(
+    program: Program,
+    programID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_programs"])],
+) -> Program:
     # some servers might NOT want to allow updating a program's ID:
     # if program.id and program.id != programID:
     #     raise OpenADR3Exception(
@@ -191,7 +182,10 @@ def update_program(program: Program, programID: ObjectID) -> Program:
     return program
 
 
-def delete_program(programID: ObjectID) -> Program:
+def delete_program(
+    programID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_programs"])],
+) -> Program:
     """
     Delete an existing program with the programID in path.
     """
@@ -202,9 +196,10 @@ def delete_program(programID: ObjectID) -> Program:
 
 
 def search_all_reports(
-    programID: ObjectID = "",
-    clientName: str = "",
-    eventID: ObjectID = "",
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+    programID: Optional[ObjectID],
+    eventID: Optional[ObjectID],
+    clientName: Optional[str],
     skip: PositiveInt32 = 0,
     limit: PositiveInt32 = 50,
 ) -> list[Report]:
@@ -242,7 +237,10 @@ def search_all_reports(
     return results
 
 
-def create_report(report: Report) -> Report:
+def create_report(
+    report: Report,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_reports"])],
+) -> Report:
     """Create a new report in the server."""
     if not report.id:
         # make one?
@@ -252,7 +250,10 @@ def create_report(report: Report) -> Report:
     return report
 
 
-def search_reports_by_report_id(reportID: ObjectID) -> Report:
+def search_reports_by_report_id(
+    reportID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+) -> Report:
     """
     Fetch the report specified by the reportID in path.
     """
@@ -262,7 +263,11 @@ def search_reports_by_report_id(reportID: ObjectID) -> Report:
         raise ReportNotFound(reportID, status=404)
 
 
-def update_report(report: Report, reportID: ObjectID) -> Report:
+def update_report(
+    report: Report,
+    reportID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_reports"])],
+) -> Report:
     """
     Update the report specified by the reportID in path.
     """
@@ -279,7 +284,10 @@ def update_report(report: Report, reportID: ObjectID) -> Report:
     return report
 
 
-def delete_report(reportID: ObjectID) -> Report:
+def delete_report(
+    reportID: ObjectID,
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_reports"])],
+) -> Report:
     """
     Delete the program specified by the reportID in path.
     """
@@ -290,6 +298,7 @@ def delete_report(reportID: ObjectID) -> Report:
 
 
 def search_all_events(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
     programID: Optional[ObjectID] = None,
     targetType: Optional[str] = None,
     targetValues: Optional[list[str]] = None,
@@ -305,7 +314,10 @@ def search_all_events(
     return results
 
 
-def create_event(event: Event) -> Event:
+def create_event(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_events"])],
+    event: Event,
+) -> Event:
     # HACK: for compatibility reasons, check name unique:
     if event.eventName not in {e.eventName for e in DB.events.values()}:
         raise OpenADR3Exception(
@@ -316,11 +328,15 @@ def create_event(event: Event) -> Event:
                 instance=Url("/TODO"),
             )
         )
+    assert event.id  # HACK
     DB.events[event.id] = event
     return event
 
 
-def search_events_by_id(eventID: ObjectID) -> Event:
+def search_events_by_id(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+    eventID: ObjectID,
+) -> Event:
     "Fetch event associated with the eventID in path."
     if (event := DB.events.get(eventID)) is not None:
         return event
@@ -328,13 +344,20 @@ def search_events_by_id(eventID: ObjectID) -> Event:
         raise EventNotFound(eventID, status=404)
 
 
-def update_event(eventID: ObjectID, event: Event) -> Event:
+def update_event(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_events"])],
+    eventID: ObjectID,
+    event: Event,
+) -> Event:
     """Update the event specified by the eventID in path."""
     DB.events[eventID] = event  # FIXME: handle conflicts, id generation, etc
     return event
 
 
-def delete_event(eventID: ObjectID) -> Event:
+def delete_event(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_events"])],
+    eventID: ObjectID,
+) -> Event:
     """Delete the event specified by the eventID in path."""
     if (event := DB.events.pop(eventID, None)) is not None:
         return event
@@ -453,6 +476,7 @@ def register_event_paths():
 
 
 def search_subscriptions(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
     programID: ObjectID,
     clientName: str,
     targetType: str,
@@ -492,7 +516,10 @@ def search_subscriptions(
     return results
 
 
-def create_subscription(subscription: Subscription) -> Subscription:
+def create_subscription(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_subscriptions"])],
+    subscription: Subscription,
+) -> Subscription:
     """Create a new subscription in the server."""
     if not subscription.id:
         # make one?
@@ -501,7 +528,10 @@ def create_subscription(subscription: Subscription) -> Subscription:
     return subscription
 
 
-def search_subscription_by_id(subscriptionID: ObjectID) -> Subscription:
+def search_subscription_by_id(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+    subscriptionID: ObjectID,
+) -> Subscription:
     """
     Return the subscription specified by subscriptionID specified in path.
     """
@@ -511,7 +541,11 @@ def search_subscription_by_id(subscriptionID: ObjectID) -> Subscription:
         raise SubscriptionNotFound(subscriptionID, status=404)
 
 
-def update_subscription(subscriptionID: ObjectID, subscription: Subscription) -> None:
+def update_subscription(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_subscriptions"])],
+    subscriptionID: ObjectID,
+    subscription: Subscription,
+) -> None:
     """
     Update the subscription specified by subscriptionID specified in path.
     """
@@ -520,7 +554,10 @@ def update_subscription(subscriptionID: ObjectID, subscription: Subscription) ->
     )
 
 
-def delete_subscription(subscriptionID: ObjectID) -> Subscription:
+def delete_subscription(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_subscriptions"])],
+    subscriptionID: ObjectID,
+) -> Subscription:
     if (sub := DB.subscriptions.pop(subscriptionID, None)) is not None:
         return sub
     else:
@@ -565,6 +602,7 @@ def register_subscription_paths():
 
 
 def search_vens(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
     skip: PositiveInt32,
     targetType: Optional[str],
     venName: Optional[str],
@@ -582,7 +620,9 @@ def search_vens(
     return results
 
 
-def create_ven(ven: VEN) -> VEN:
+def create_ven(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])], ven: VEN
+) -> VEN:
     """Create a new ven in the server."""
     if not ven.id:
         # make one?
@@ -592,7 +632,10 @@ def create_ven(ven: VEN) -> VEN:
     return ven
 
 
-def search_ven_by_id(venID: ObjectID) -> VEN:
+def search_ven_by_id(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["read_all"])],
+    venID: ObjectID,
+) -> VEN:
     """
     Return the ven specified by venID specified in path.
     """
@@ -602,7 +645,11 @@ def search_ven_by_id(venID: ObjectID) -> VEN:
         raise VenNotFound(venID, status=404)
 
 
-def update_ven(venID: ObjectID, ven: VEN) -> VEN:
+def update_ven(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
+    venID: ObjectID,
+    ven: VEN,
+) -> VEN:
     """
     Update the ven specified by venID specified in path.
     """
@@ -615,7 +662,10 @@ def update_ven(venID: ObjectID, ven: VEN) -> VEN:
     return ven
 
 
-def delete_ven(venID: ObjectID) -> VEN:
+def delete_ven(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
+    venID: ObjectID,
+) -> VEN:
     """
     Delete the ven specified by venID specified in path.
     """
@@ -627,6 +677,7 @@ def delete_ven(venID: ObjectID) -> VEN:
 
 
 def search_ven_resources(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
     venID: ObjectID,
     resourceName: Optional[str],
     targetType: Optional[str],
@@ -644,7 +695,11 @@ def search_ven_resources(
     ...  # TODO: implement
 
 
-def create_resource(venID: ObjectID, resource: Resource) -> Resource:
+def create_resource(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
+    venID: ObjectID,
+    resource: Resource,
+) -> Resource:
     """Create a new resource"""
     if (resources := DB.resources.get(venID)) is None:
         raise VenNotFound(venID, status=404)
@@ -656,7 +711,11 @@ def create_resource(venID: ObjectID, resource: Resource) -> Resource:
     return resource
 
 
-def search_ven_resource_by_id(venID: ObjectID, resourceID: ObjectID) -> Resource:
+def search_ven_resource_by_id(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
+    venID: ObjectID,
+    resourceID: ObjectID,
+) -> Resource:
     """
     Return the ven resource specified by venID and resourceID specified in path.
     """
@@ -668,7 +727,11 @@ def search_ven_resource_by_id(venID: ObjectID, resourceID: ObjectID) -> Resource
         raise VenNotFound(venID, status=404)
 
 
-def delete_ven_resource(venID: ObjectID, resourceID: ObjectID) -> Resource:
+def delete_ven_resource(
+    caller_id: Annotated[str, Security(get_bearer_id, scopes=["write_vens"])],
+    venID: ObjectID,
+    resourceID: ObjectID,
+) -> Resource:
     """
     Delete the ven resource specified by venID and resourceID specified in path.
     """
